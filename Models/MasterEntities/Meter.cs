@@ -1,5 +1,6 @@
 using RentManagementApp.Models.RelationshipEntities;
 using RentManagementApp.Models.TransactionalEntities;
+using RentManagementApp.Models.Enums;
 
 namespace RentManagementApp.Models.MasterEntities
 {
@@ -11,7 +12,7 @@ namespace RentManagementApp.Models.MasterEntities
 
         public string MeterName { get; set; }
 
-        public string MeterType { get; set; }
+        public MeterType MeterType { get; set; }
 
         public decimal InitialReading { get; set; }
 

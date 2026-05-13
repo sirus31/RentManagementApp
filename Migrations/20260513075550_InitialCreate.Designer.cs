@@ -12,8 +12,8 @@ using RentManagementApp.Data;
 namespace RentManagementApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260512113207_ConfigureRelationships")]
-    partial class ConfigureRelationships
+    [Migration("20260513075550_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,9 +105,8 @@ namespace RentManagementApp.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("MeterType")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("MeterType")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -296,9 +295,8 @@ namespace RentManagementApp.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("BillStatus")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("BillStatus")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("ElectricityAmount")
                         .HasPrecision(18, 2)
@@ -314,9 +312,8 @@ namespace RentManagementApp.Migrations
                     b.Property<DateTime>("GeneratedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("RentAmount")
                         .HasPrecision(18, 2)

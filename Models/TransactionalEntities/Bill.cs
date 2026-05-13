@@ -1,5 +1,6 @@
 using RentManagementApp.Models.MasterEntities;
 using RentManagementApp.Models.TransactionalEntities;
+using RentManagementApp.Models.Enums;
 
 namespace RentManagementApp.Models.TransactionalEntities
 {
@@ -23,9 +24,9 @@ namespace RentManagementApp.Models.TransactionalEntities
 
         public decimal AmountPaid { get; set; }
 
-        public string PaymentStatus { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
 
-        public string BillStatus { get; set; }
+        public BillStatus BillStatus { get; set; }
 
         public DateTime GeneratedDate { get; set; }
 
