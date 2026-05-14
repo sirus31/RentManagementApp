@@ -11,11 +11,11 @@ namespace RentManagementApp.Models.MasterEntities
 
         public string PhoneNumber { get; set; }
 
-        public string WhatsAppNumber { get; set; }
+        public string? WhatsAppNumber { get; set; }
 
-        public string IdentificationNumber { get; set; }
+        public string? IdentificationNumber { get; set; }
 
-        public string PermanentAddress { get; set; }
+        public string? PermanentAddress { get; set; }
 
         public DateTime JoinDate { get; set; }
 
@@ -27,7 +27,7 @@ namespace RentManagementApp.Models.MasterEntities
 
         public List<TenantRoom> TenantRooms { get; set; }
 
-        public List<TenantMeter> TenantMeters { get; set; }
+        public List<TenantMeter> TenantMeters { get; set; } 
 
         public List<Bill> Bills { get; set; }
     }

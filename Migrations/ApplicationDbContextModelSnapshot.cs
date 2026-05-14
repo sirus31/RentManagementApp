@@ -150,7 +150,6 @@ namespace RentManagementApp.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("IdentificationNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
@@ -167,7 +166,6 @@ namespace RentManagementApp.Migrations
                         .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("PermanentAddress")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
@@ -175,7 +173,6 @@ namespace RentManagementApp.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("WhatsAppNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");

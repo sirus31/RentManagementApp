@@ -1,7 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using RentManagementApp.Data;
+using RentManagementApp.Services;
+using RentManagementApp.Services.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
@@ -9,8 +15,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<
+    ITenantService,
+    TenantService>();
+
 var app = builder.Build();
 
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.Run();
