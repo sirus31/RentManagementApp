@@ -6,6 +6,7 @@ using RentManagementApp.DTOs.Requests;
 using RentManagementApp.DTOs.Responses;
 
 using RentManagementApp.Models.MasterEntities;
+using RentManagementApp.Models.RelationshipEntities;
 
 using RentManagementApp.Services.Interfaces;
 
@@ -46,6 +47,74 @@ namespace RentManagementApp.Services
             };
 
             return response;
+        }
+
+
+        public async Task<List<TenantResponseDto>> GetAllTenantsAsync()
+        {
+            var tenants = await _context.Tenants
+                .Select(t => new TenantResponseDto
+                {
+                    Id = t.Id,
+                    FullName = t.FullName,
+                    PhoneNumber = t.PhoneNumber,
+                    MonthlyRent = t.MonthlyRent,
+                    IsActive = t.IsActive
+                })
+                .ToListAsync();
+
+            return tenants;
+        }
+
+        public async Task<List<TenantWithRoomsResponseDto>> GetTenantsWithRoomsAsync()
+        {
+            var tenants = await _context.Tenants
+                .Include(t => t.TenantRooms)
+                    .ThenInclude(tr => tr.Room)
+                .Select(t => new TenantWithRoomsResponseDto
+                {
+                    Id = t.Id,
+                    FullName = t.FullName,
+
+                    RoomNumbers = t.TenantRooms
+                        .Select(tr => tr.Room.RoomNumber)
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return tenants;
+        }
+
+        public async Task AssignRoomAsync(AssignRoomRequestDto request)
+        {
+            var tenantExists = await _context.Tenants
+                .AnyAsync(t => t.Id == request.TenantId);
+
+            if (!tenantExists)
+            {
+                throw new Exception("Tenant not found");
+            }
+
+            var roomExists = await _context.Rooms
+                .AnyAsync(r => r.Id == request.RoomId);
+
+            if (!roomExists)
+            {
+                throw new Exception("Room not found");
+            }
+
+            var tenantRoom = new TenantRoom
+            {
+                TenantId = request.TenantId,
+                RoomId = request.RoomId,
+                StartDate = request.StartDate,
+                IsActive = true
+            };
+
+            await _context.TenantRooms
+                .AddAsync(tenantRoom);
+
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -25,5 +25,32 @@ namespace RentManagementApp.Controllers
 
             return Ok(response);
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllTenants()
+        {
+            var tenants = await _tenantService
+                .GetAllTenantsAsync();
+
+            return Ok(tenants);
+        }
+
+        [HttpGet("with-rooms")]
+        public async Task<IActionResult> GetTenantsWithRooms()
+        {
+            var tenants = await _tenantService
+                .GetTenantsWithRoomsAsync();
+
+            return Ok(tenants);
+        }
+
+        [HttpPost("assign-room")]
+        public async Task<IActionResult> AssignRoom(AssignRoomRequestDto request)
+        {
+            await _tenantService.AssignRoomAsync(request);
+
+            return Ok("Room assigned successfully");
+        }
     }
 }

@@ -7,5 +7,11 @@ namespace RentManagementApp.Services.Interfaces
     {
         Task<TenantResponseDto> CreateTenantAsync(
             CreateTenantRequestDto request);
+
+        Task<List<TenantResponseDto>> GetAllTenantsAsync();
+
+        Task<List<TenantWithRoomsResponseDto>> GetTenantsWithRoomsAsync();
+
+        Task AssignRoomAsync(AssignRoomRequestDto request);
     }
 }
