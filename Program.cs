@@ -27,6 +27,10 @@ builder.Services.AddScoped<
     IFloorService,
     FloorService>();
 
+builder.Services.AddScoped<
+    IRoomService,
+    RoomService>();
+
 var app = builder.Build();
 
 app.MapControllers();

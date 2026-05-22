@@ -9,12 +9,10 @@ namespace RentManagementApp.Models.MasterEntities
 
         public int FloorId { get; set; }
 
-        public string RoomNumber { get; set; }
+        public string RoomNumber { get; set; } = null!;
 
-        public bool IsOccupied { get; set; }
+        public Floor Floor { get; set; } = null!;
 
-        public Floor Floor { get; set; }
-
-        public List<TenantRoom> TenantRooms { get; set; }
+        public List<TenantRoom> TenantRooms { get; set; } = new();
     }
 }
