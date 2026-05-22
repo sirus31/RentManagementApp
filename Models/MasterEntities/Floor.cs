@@ -9,12 +9,12 @@ namespace RentManagementApp.Models.MasterEntities
 
         public int HouseId { get; set; }
 
-        public int FloorNumber {get; set;}
+        public int FloorNumber { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
-        public House House { get; set; }
+        public House House { get; set; } = null!;
 
-        public List<Room> Rooms { get; set; }
+        public List<Room> Rooms { get; set; } = new();
     }
 }

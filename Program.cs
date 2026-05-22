@@ -23,6 +23,10 @@ builder.Services.AddScoped<
     IHouseService,
     HouseService>();
 
+builder.Services.AddScoped<
+    IFloorService,
+    FloorService>();
+
 var app = builder.Build();
 
 app.MapControllers();
