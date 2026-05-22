@@ -108,7 +108,6 @@ namespace RentManagementApp.Services
                 TenantId = request.TenantId,
                 RoomId = request.RoomId,
                 StartDate = request.StartDate,
-                IsActive = true
             };
 
             await _context.TenantRooms

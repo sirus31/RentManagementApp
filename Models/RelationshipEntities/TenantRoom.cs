@@ -15,10 +15,8 @@ namespace RentManagementApp.Models.RelationshipEntities
 
         public DateTime? EndDate { get; set; }
 
-        public bool IsActive { get; set; }
+        public Tenant Tenant { get; set; } = null!;
 
-        public Tenant Tenant { get; set; }
-
-        public Room Room { get; set; }
+        public Room Room { get; set; } = null!;
     }
 }

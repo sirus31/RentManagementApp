@@ -31,6 +31,10 @@ builder.Services.AddScoped<
     IRoomService,
     RoomService>();
 
+builder.Services.AddScoped<
+    IOccupancyService,
+    OccupancyService>();
+
 var app = builder.Build();
 
 app.MapControllers();
