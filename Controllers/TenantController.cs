@@ -36,14 +36,28 @@ namespace RentManagementApp.Controllers
             return Ok(tenants);
         }
 
-        [HttpGet("with-rooms")]
-        public async Task<IActionResult> GetTenantsWithRooms()
+
+        [HttpGet("active-rooms")]
+        public async Task<IActionResult> GetTenantsWithActiveRooms()
         {
-            var tenants = await _tenantService
-                .GetTenantsWithRoomsAsync();
+            var tenants =
+                await _tenantService
+                    .GetTenantsWithActiveRoomsAsync();
 
             return Ok(tenants);
         }
+
+
+        [HttpGet("occupancy-history")]
+        public async Task<IActionResult> GetTenantOccupancyHistory()
+        {
+            var tenants =
+                await _tenantService
+                    .GetTenantOccupancyHistoryAsync();
+
+            return Ok(tenants);
+        }
+
 
         [HttpPost("assign-room")]
         public async Task<IActionResult> AssignRoom(AssignRoomRequestDto request)

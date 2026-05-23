@@ -1,6 +1,6 @@
 namespace RentManagementApp.DTOs.Responses
 {
-    public class TenantWithRoomsResponseDto
+    public class TenantRoomSummaryResponseDto
     {
         public int Id { get; set; }
 

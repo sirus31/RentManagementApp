@@ -66,25 +66,53 @@ namespace RentManagementApp.Services
             return tenants;
         }
 
-        public async Task<List<TenantWithRoomsResponseDto>> GetTenantsWithRoomsAsync()
+        public async Task<List<TenantRoomSummaryResponseDto>> GetTenantsWithActiveRoomsAsync()
         {
             var tenants = await _context.Tenants
                 .Include(t => t.TenantRooms)
                     .ThenInclude(tr => tr.Room)
-                .Select(t => new TenantWithRoomsResponseDto
+
+                .Select(t => new TenantRoomSummaryResponseDto
                 {
                     Id = t.Id,
+
                     FullName = t.FullName,
 
                     RoomNumbers = t.TenantRooms
+
+                        .Where(tr => tr.EndDate == null)
+
                         .Select(tr => tr.Room.RoomNumber)
+
                         .ToList()
                 })
                 .ToListAsync();
 
             return tenants;
         }
+        
+        public async Task<List<TenantRoomSummaryResponseDto>> GetTenantOccupancyHistoryAsync()
+        {
+            var tenants = await _context.Tenants
+                .Include(t => t.TenantRooms)
+                    .ThenInclude(tr => tr.Room)
 
+                .Select(t => new TenantRoomSummaryResponseDto
+                {
+                    Id = t.Id,
+
+                    FullName = t.FullName,
+
+                    RoomNumbers = t.TenantRooms
+
+                        .Select(tr => tr.Room.RoomNumber)
+
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return tenants;
+        }
         public async Task AssignRoomAsync(AssignRoomRequestDto request)
         {
             var tenantExists = await _context.Tenants

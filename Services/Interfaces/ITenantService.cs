@@ -10,7 +10,9 @@ namespace RentManagementApp.Services.Interfaces
 
         Task<List<TenantResponseDto>> GetAllTenantsAsync();
 
-        Task<List<TenantWithRoomsResponseDto>> GetTenantsWithRoomsAsync();
+        Task<List<TenantRoomSummaryResponseDto>> GetTenantsWithActiveRoomsAsync();
+
+        Task<List<TenantRoomSummaryResponseDto>> GetTenantOccupancyHistoryAsync();
 
         Task AssignRoomAsync(AssignRoomRequestDto request);
     }

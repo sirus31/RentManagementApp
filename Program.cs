@@ -35,6 +35,10 @@ builder.Services.AddScoped<
     IOccupancyService,
     OccupancyService>();
 
+builder.Services.AddScoped<
+    IMeterAssignmentService,
+    MeterAssignmentService>();
+
 var app = builder.Build();
 
 app.MapControllers();

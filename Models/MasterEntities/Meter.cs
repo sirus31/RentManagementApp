@@ -10,7 +10,7 @@ namespace RentManagementApp.Models.MasterEntities
 
         public int HouseId { get; set; }
 
-        public string MeterName { get; set; }
+        public string MeterNumber { get; set; } = null!;
 
         public MeterType MeterType { get; set; }
 
@@ -18,10 +18,12 @@ namespace RentManagementApp.Models.MasterEntities
 
         public bool IsActive { get; set; }
 
-        public House House { get; set; }
+        public House House { get; set; } = null!;
 
-        public List<TenantMeter> TenantMeters { get; set; }
+        public List<TenantMeter> TenantMeters
+            { get; set; } = new();
 
-        public List<MeterReading> MeterReadings { get; set; }
+        public List<MeterReading> MeterReadings
+            { get; set; } = new();
     }
 }
