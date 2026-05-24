@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using RentManagementApp.Data;
 using RentManagementApp.Services;
 using RentManagementApp.Services.Interfaces;
+using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions
+            .Converters
+            .Add(
+                new JsonStringEnumConverter());
+    });
 
 builder.Services.AddScoped<
     ITenantService,
@@ -38,6 +47,10 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IMeterAssignmentService,
     MeterAssignmentService>();
+
+builder.Services.AddScoped<
+    IMeterReadingService,
+    MeterReadingService>();
 
 var app = builder.Build();
 

@@ -1,13 +1,9 @@
-using RentManagementApp.Models.MasterEntities;
-using RentManagementApp.Models.TransactionalEntities;
 using RentManagementApp.Models.Enums;
 
-namespace RentManagementApp.Models.TransactionalEntities
+namespace RentManagementApp.DTOs.Requests
 {
-    public class MeterReading
+    public class CreateMeterReadingRequestDto
     {
-        public int Id { get; set; }
-
         public int MeterId { get; set; }
 
         public decimal ReadingValue { get; set; }
@@ -19,7 +15,5 @@ namespace RentManagementApp.Models.TransactionalEntities
         public BillingMonth BillingMonth { get; set; }
 
         public string? Notes { get; set; }
-
-        public Meter Meter { get; set; } = null!;
     }
 }
