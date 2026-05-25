@@ -1,17 +1,16 @@
-using RentManagementApp.Models.MasterEntities;
-using RentManagementApp.Models.TransactionalEntities;
 using RentManagementApp.Models.Enums;
 
-namespace RentManagementApp.Models.TransactionalEntities
+namespace RentManagementApp.DTOs.Responses
 {
-    public class Bill
+    public class BillResponseDto
     {
         public int Id { get; set; }
 
         public string BillNumber { get; set; }
             = string.Empty;
 
-        public int TenantId { get; set; }
+        public string TenantName { get; set; }
+            = string.Empty;
 
         public int BillingYear { get; set; }
 
@@ -32,13 +31,5 @@ namespace RentManagementApp.Models.TransactionalEntities
         public BillStatus BillStatus { get; set; }
 
         public DateTime GeneratedDate { get; set; }
-
-        public DateTime? FinalizedDate { get; set; }
-
-        public Tenant Tenant { get; set; }
-            = null!;
-
-        public List<Payment> Payments { get; set; }
-            = new();
     }
 }

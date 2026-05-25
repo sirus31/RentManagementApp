@@ -67,6 +67,23 @@ namespace RentManagementApp.Services
                     "Tenant has no active rooms");
             }
 
+            var duplicateAssignment =
+                await _context.TenantMeters
+                    .AnyAsync(tm =>
+                        tm.TenantId ==
+                            request.TenantId
+                        &&
+                        tm.MeterId ==
+                            request.MeterId
+                        &&
+                        tm.EndDate == null);
+
+            if (duplicateAssignment)
+            {
+                throw new Exception(
+                    "Tenant already assigned to this meter");
+            }
+
             if (meter.MeterType ==
                 MeterType.Private)
             {

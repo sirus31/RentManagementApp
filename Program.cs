@@ -52,6 +52,14 @@ builder.Services.AddScoped<
     IMeterReadingService,
     MeterReadingService>();
 
+builder.Services.AddScoped<
+    IBillService,
+    BillService>();
+
+builder.Services.AddScoped<
+    IMeterService,
+    MeterService>();
+
 var app = builder.Build();
 
 app.MapControllers();
