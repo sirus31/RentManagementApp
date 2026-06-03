@@ -34,6 +34,8 @@ namespace RentManagementApp.Data
 
         public DbSet<Payment> Payments { get; set; }
 
+        public DbSet<BillDetail> BillDetails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -76,6 +78,29 @@ namespace RentManagementApp.Data
                 .Property(p => p.Amount)
                 .HasPrecision(18, 2);
 
+            modelBuilder.Entity<BillDetail>()
+                .Property(bd => bd.PreviousReading)
+                .HasPrecision(18, 2);
+
+
+            modelBuilder.Entity<BillDetail>()
+                .Property(bd => bd.CurrentReading)
+                .HasPrecision(18, 2);
+
+
+            modelBuilder.Entity<BillDetail>()
+                .Property(bd => bd.UnitsConsumed)
+                .HasPrecision(18, 2);
+
+
+            modelBuilder.Entity<BillDetail>()
+                .Property(bd => bd.Rate)
+                .HasPrecision(18, 2);
+
+
+            modelBuilder.Entity<BillDetail>()
+                .Property(bd => bd.Amount)
+                .HasPrecision(18, 2);
 
             // RELATIONSHIP CONFIGURATION
 
@@ -105,6 +130,12 @@ namespace RentManagementApp.Data
                 .HasForeignKey(p => p.BillId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<BillDetail>()
+                .HasOne(bd => bd.Bill)
+                .WithMany(b => b.BillDetails)
+                .HasForeignKey(bd => bd.BillId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
             // UNIQUE CONSTRAINTS
 
             modelBuilder.Entity<Bill>()

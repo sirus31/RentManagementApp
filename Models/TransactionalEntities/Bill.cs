@@ -40,5 +40,8 @@ namespace RentManagementApp.Models.TransactionalEntities
 
         public List<Payment> Payments { get; set; }
             = new();
+        
+        public List<BillDetail> BillDetails { get; set; }
+            = new();
     }
 }
