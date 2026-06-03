@@ -95,5 +95,19 @@ namespace RentManagementApp.Controllers
 
             return Ok(bill);
         }
+
+        [HttpPost("generate-all")]
+        public async Task<IActionResult>
+            GenerateAllBills(
+                GenerateAllBillsRequestDto request)
+        {
+            var result =
+                await _billService
+                    .GenerateAllBillsAsync(
+                        request);
+
+
+            return Ok(result);
+        }
     }
 }

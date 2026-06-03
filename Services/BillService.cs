@@ -325,6 +325,127 @@ namespace RentManagementApp.Services
                 bill.Id);
         }
 
+        public async Task<List<GenerateBillResultDto>>
+            GenerateAllBillsAsync(
+                GenerateAllBillsRequestDto request)
+        {
+            var results =
+                new List<GenerateBillResultDto>();
+
+
+            var tenants =
+                await _context.Tenants
+
+                    .Include(t => t.TenantRooms)
+
+                    .Where(t =>
+                        t.TenantRooms.Any(tr =>
+                            tr.EndDate == null))
+
+                    .ToListAsync();
+
+
+            foreach (var tenant in tenants)
+            {
+                var existingBill =
+                    await _context.Bills
+                        .FirstOrDefaultAsync(b =>
+                            b.TenantId == tenant.Id
+                            &&
+                            b.BillingYear == request.BillingYear
+                            &&
+                            b.BillingMonth == request.BillingMonth);
+
+
+                if (existingBill != null)
+                {
+                    results.Add(
+                        new GenerateBillResultDto
+                        {
+                            TenantId =
+                                tenant.Id,
+
+                            TenantName =
+                                tenant.FullName,
+
+                            Status =
+                                "AlreadyExists",
+
+                            Message =
+                                "Bill already generated",
+
+                            BillId =
+                                existingBill.Id
+                        });
+
+
+                    continue;
+                }
+
+
+
+                try
+                {
+                    var bill =
+                        await GenerateBillAsync(
+                            new GenerateBillRequestDto
+                            {
+                                TenantId =
+                                    tenant.Id,
+
+                                BillingYear =
+                                    request.BillingYear,
+
+                                BillingMonth =
+                                    request.BillingMonth
+                            });
+
+
+                    results.Add(
+                        new GenerateBillResultDto
+                        {
+                            TenantId =
+                                tenant.Id,
+
+                            TenantName =
+                                tenant.FullName,
+
+                            Status =
+                                "Generated",
+
+                            Message =
+                                "Bill generated successfully",
+
+                            BillId =
+                                bill.Id
+                        });
+                }
+
+
+                catch (Exception ex)
+                {
+                    results.Add(
+                        new GenerateBillResultDto
+                        {
+                            TenantId =
+                                tenant.Id,
+
+                            TenantName =
+                                tenant.FullName,
+
+                            Status =
+                                "Failed",
+
+                            Message =
+                                ex.Message
+                        });
+                }
+            }
+
+
+            return results;
+        }
+        
         public async Task<List<BillResponseDto>>
             GetTenantBillsAsync(
                 int tenantId)

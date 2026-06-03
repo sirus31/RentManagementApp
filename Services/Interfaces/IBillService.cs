@@ -9,6 +9,10 @@ namespace RentManagementApp.Services.Interfaces
             GenerateBillAsync(
                 GenerateBillRequestDto request);
 
+        Task<List<GenerateBillResultDto>>
+            GenerateAllBillsAsync(
+                GenerateAllBillsRequestDto request);
+
         Task<List<BillResponseDto>>
             GetTenantBillsAsync(
                 int tenantId);
