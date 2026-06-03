@@ -66,5 +66,17 @@ namespace RentManagementApp.Controllers
 
             return Ok("Room assigned successfully");
         }
+
+        [HttpPost("{tenantId}/vacate")]
+        public async Task<IActionResult> VacateTenant(int tenantId)
+        {
+            var result =
+                await _tenantService
+                    .VacateTenantAsync(
+                        tenantId);
+
+
+            return Ok(result);
+        }
     }
 }

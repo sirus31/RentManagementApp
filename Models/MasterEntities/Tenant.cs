@@ -8,8 +8,10 @@ namespace RentManagementApp.Models.MasterEntities
         public int Id { get; set; }
 
         public string FullName { get; set; }
+            = string.Empty;
 
         public string PhoneNumber { get; set; }
+            = string.Empty;
 
         public string? WhatsAppNumber { get; set; }
 
@@ -26,9 +28,13 @@ namespace RentManagementApp.Models.MasterEntities
         public decimal MonthlyRent { get; set; }
 
         public List<TenantRoom> TenantRooms { get; set; }
+            = new();
 
         public List<TenantMeter> TenantMeters { get; set; } 
+            = new();
 
         public List<Bill> Bills { get; set; }
+            = new();
+
     }
 }

@@ -8,6 +8,8 @@ using RentManagementApp.DTOs.Responses;
 using RentManagementApp.Models.MasterEntities;
 using RentManagementApp.Models.RelationshipEntities;
 
+using RentManagementApp.Models.Enums;
+
 using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Services
@@ -142,6 +144,100 @@ namespace RentManagementApp.Services
                 .AddAsync(tenantRoom);
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<VacateTenantResponseDto> VacateTenantAsync(int tenantId)
+        {
+            var tenant =
+                await _context.Tenants
+
+                    .Include(t => t.TenantRooms)
+
+                    .Include(t => t.TenantMeters)
+
+                    .Include(t => t.Bills)
+
+                    .FirstOrDefaultAsync(t =>
+                        t.Id == tenantId);
+
+
+            if (tenant == null)
+            {
+                throw new Exception(
+                    "Tenant not found");
+            }
+
+
+            if (!tenant.IsActive)
+            {
+                throw new Exception(
+                    "Tenant already vacated");
+            }
+
+
+            var hasPendingBills =
+                tenant.Bills.Any(b =>
+                    b.PaymentStatus != PaymentStatus.Paid);
+
+
+            if (hasPendingBills)
+            {
+                throw new Exception(
+                    "Tenant has unpaid bills. Clear payment before vacating.");
+            }
+
+
+
+            var leavingDate =
+                DateTime.UtcNow;
+
+
+
+            foreach (var room in tenant.TenantRooms
+                        .Where(tr => tr.EndDate == null))
+            {
+                room.EndDate =
+                    leavingDate;
+            }
+
+
+
+            foreach (var meter in tenant.TenantMeters
+                        .Where(tm => tm.EndDate == null))
+            {
+                meter.EndDate =
+                    leavingDate;
+            }
+
+
+
+            tenant.IsActive =
+                false;
+
+
+            tenant.LeaveDate =
+                leavingDate;
+
+
+
+            await _context.SaveChangesAsync();
+
+
+
+            return new VacateTenantResponseDto
+            {
+                TenantId =
+                    tenant.Id,
+
+                TenantName =
+                    tenant.FullName,
+
+                LeaveDate =
+                    leavingDate,
+
+                Message =
+                    "Tenant vacated successfully"
+            };
         }
     }
 }
