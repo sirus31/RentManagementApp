@@ -60,6 +60,10 @@ builder.Services.AddScoped<
     IMeterService,
     MeterService>();
 
+builder.Services.AddScoped<
+    IPaymentService,
+    PaymentService>();
+
 var app = builder.Build();
 
 app.MapControllers();

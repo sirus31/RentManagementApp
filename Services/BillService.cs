@@ -313,5 +313,185 @@ namespace RentManagementApp.Services
 
             return bills;
         }
+    
+        public async Task<List<BillResponseDto>>
+            GetAllBillsAsync()
+        {
+            var bills = await _context.Bills
+                .Include(b => b.Tenant)
+                .OrderByDescending(b =>
+                    b.GeneratedDate)
+                .Select(b =>
+                    new BillResponseDto
+                    {
+                        Id = b.Id,
+
+                        BillNumber =
+                            b.BillNumber,
+
+                        TenantName =
+                            b.Tenant.FullName,
+
+                        BillingYear =
+                            b.BillingYear,
+
+                        BillingMonth =
+                            b.BillingMonth,
+
+                        RentAmount =
+                            b.RentAmount,
+
+                        ElectricityAmount =
+                            b.ElectricityAmount,
+
+                        GarbageAmount =
+                            b.GarbageAmount,
+
+                        TotalAmount =
+                            b.TotalAmount,
+
+                        AmountPaid =
+                            b.AmountPaid,
+
+                        PaymentStatus =
+                            b.PaymentStatus,
+
+                        BillStatus =
+                            b.BillStatus,
+
+                        GeneratedDate =
+                            b.GeneratedDate
+                    })
+                .ToListAsync();
+
+            return bills;
+        }
+    
+        public async Task<BillResponseDto>
+            GetBillByIdAsync(
+                int billId)
+        {
+            var bill = await _context.Bills
+                .Include(b => b.Tenant)
+                .FirstOrDefaultAsync(b =>
+                    b.Id == billId);
+
+            if (bill == null)
+            {
+                throw new Exception(
+                    "Bill not found");
+            }
+
+            return new BillResponseDto
+            {
+                Id = bill.Id,
+
+                BillNumber =
+                    bill.BillNumber,
+
+                TenantName =
+                    bill.Tenant.FullName,
+
+                BillingYear =
+                    bill.BillingYear,
+
+                BillingMonth =
+                    bill.BillingMonth,
+
+                RentAmount =
+                    bill.RentAmount,
+
+                ElectricityAmount =
+                    bill.ElectricityAmount,
+
+                GarbageAmount =
+                    bill.GarbageAmount,
+
+                TotalAmount =
+                    bill.TotalAmount,
+
+                AmountPaid =
+                    bill.AmountPaid,
+
+                PaymentStatus =
+                    bill.PaymentStatus,
+
+                BillStatus =
+                    bill.BillStatus,
+
+                GeneratedDate =
+                    bill.GeneratedDate
+            };
+        }
+    
+        public async Task<BillResponseDto>
+            FinalizeBillAsync(
+                int billId)
+        {
+            var bill = await _context.Bills
+                .Include(b => b.Tenant)
+                .FirstOrDefaultAsync(b =>
+                    b.Id == billId);
+
+            if (bill == null)
+            {
+                throw new Exception(
+                    "Bill not found");
+            }
+
+            if (bill.BillStatus ==
+                BillStatus.Cancelled)
+            {
+                throw new Exception(
+                    "Cancelled bill cannot be finalized");
+            }
+
+            if (bill.BillStatus == BillStatus.Finalized)
+            {
+                throw new Exception(
+                    "Bill already finalized");
+            }
+
+            bill.BillStatus =
+                BillStatus.Finalized;
+
+            bill.FinalizedDate =
+                DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return await GetBillByIdAsync(
+                bill.Id);
+        }
+    
+        public async Task<BillResponseDto>
+            CancelBillAsync(
+                int billId)
+        {
+            var bill = await _context.Bills
+                .Include(b => b.Tenant)
+                .FirstOrDefaultAsync(b =>
+                    b.Id == billId);
+
+            if (bill == null)
+            {
+                throw new Exception(
+                    "Bill not found");
+            }
+
+            if (bill.AmountPaid > 0)
+            {
+                throw new Exception(
+                    "Paid bill cannot be cancelled");
+            }
+
+            bill.BillStatus =
+                BillStatus.Cancelled;
+
+            await _context.SaveChangesAsync();
+
+            return await GetBillByIdAsync(
+                bill.Id);
+        }
     }
 }

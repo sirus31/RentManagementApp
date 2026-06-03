@@ -1,13 +1,13 @@
-using RentManagementApp.Models.MasterEntities;
-using RentManagementApp.Models.TransactionalEntities;
-
-namespace RentManagementApp.Models.TransactionalEntities
+namespace RentManagementApp.DTOs.Responses
 {
-     public class Payment
+    public class PaymentResponseDto
     {
         public int Id { get; set; }
 
         public int BillId { get; set; }
+
+        public string BillNumber { get; set; }
+            = string.Empty;
 
         public decimal Amount { get; set; }
 
@@ -18,8 +18,5 @@ namespace RentManagementApp.Models.TransactionalEntities
 
         public string Notes { get; set; }
             = string.Empty;
-
-        public Bill Bill { get; set; }
-            = null!;
     }
 }

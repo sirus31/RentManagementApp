@@ -73,7 +73,7 @@ namespace RentManagementApp.Data
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<Payment>()
-                .Property(p => p.AmountPaid)
+                .Property(p => p.Amount)
                 .HasPrecision(18, 2);
 
 
@@ -97,6 +97,12 @@ namespace RentManagementApp.Data
                 .HasOne(m => m.House)
                 .WithMany(h => h.Meters)
                 .HasForeignKey(m => m.HouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Bill)
+                .WithMany(b => b.Payments)
+                .HasForeignKey(p => p.BillId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // UNIQUE CONSTRAINTS
