@@ -7,6 +7,18 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -66,7 +78,10 @@ builder.Services.AddScoped<
 
 var app = builder.Build();
 
+app.UseCors("AllowReactApp");
+
 app.MapControllers();
+
 
 if (app.Environment.IsDevelopment())
 {
