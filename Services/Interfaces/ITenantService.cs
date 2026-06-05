@@ -17,5 +17,7 @@ namespace RentManagementApp.Services.Interfaces
         Task AssignRoomAsync(AssignRoomRequestDto request);
 
         Task<VacateTenantResponseDto> VacateTenantAsync(int tenantId);
+
+        Task<TenantResponseDto?> GetTenantByIdAsync(int id);
     }
 }

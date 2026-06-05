@@ -135,13 +135,13 @@ namespace RentManagementApp.Data
                 .WithMany(b => b.BillDetails)
                 .HasForeignKey(bd => bd.BillId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
             // UNIQUE CONSTRAINTS
 
             modelBuilder.Entity<Bill>()
                 .HasIndex(b => b.BillNumber)
                 .IsUnique();
-            
+
         }
     }
 }

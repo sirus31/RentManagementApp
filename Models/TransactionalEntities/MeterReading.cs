@@ -1,6 +1,6 @@
+using RentManagementApp.Models.Enums;
 using RentManagementApp.Models.MasterEntities;
 using RentManagementApp.Models.TransactionalEntities;
-using RentManagementApp.Models.Enums;
 
 namespace RentManagementApp.Models.TransactionalEntities
 {

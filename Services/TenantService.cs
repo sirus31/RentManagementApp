@@ -1,15 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-
 using RentManagementApp.Data;
-
 using RentManagementApp.DTOs.Requests;
 using RentManagementApp.DTOs.Responses;
-
+using RentManagementApp.Models.Enums;
 using RentManagementApp.Models.MasterEntities;
 using RentManagementApp.Models.RelationshipEntities;
-
-using RentManagementApp.Models.Enums;
-
 using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Services
@@ -92,7 +87,7 @@ namespace RentManagementApp.Services
 
             return tenants;
         }
-        
+
         public async Task<List<TenantRoomSummaryResponseDto>> GetTenantOccupancyHistoryAsync()
         {
             var tenants = await _context.Tenants
@@ -237,6 +232,33 @@ namespace RentManagementApp.Services
 
                 Message =
                     "Tenant vacated successfully"
+            };
+        }
+
+        public async Task<TenantResponseDto?> GetTenantByIdAsync(int id)
+        {
+            var tenant = await _context.Tenants
+
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+
+
+            if (tenant == null)
+            {
+                return null;
+            }
+
+            return new TenantResponseDto
+            {
+                Id = tenant.Id,
+
+                FullName = tenant.FullName,
+
+                PhoneNumber = tenant.PhoneNumber,
+
+                MonthlyRent = tenant.MonthlyRent,
+
+                IsActive = tenant.IsActive
             };
         }
     }

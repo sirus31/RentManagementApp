@@ -6,6 +6,7 @@ import DashboardPage from "../pages/DashboardPage";
 import TenantPage from "../pages/TenantPage";
 import BillPage from "../pages/BillPage";
 import PaymentPage from "../pages/PaymentPage";
+import TenantDetailsPage from "../pages/TenantDetailsPage";
 
 
 function AppRoutes() {
@@ -35,6 +36,15 @@ function AppRoutes() {
                     path="/tenants"
 
                     element={<TenantPage />}
+
+                />
+
+
+                <Route
+
+                    path="/tenants/:id"
+
+                    element={<TenantDetailsPage />}
 
                 />
 

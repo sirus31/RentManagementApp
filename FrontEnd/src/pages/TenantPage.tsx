@@ -8,204 +8,73 @@ import DataTable from "../components/DataTable";
 
 import TenantForm from "../components/TenantForm";
 
+import { Link } from "react-router-dom";
+
 function TenantPage() {
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [statusFilter, setStatusFilter] = useState("all");
 
+  useEffect(() => {
+    loadTenants();
+  }, []);
 
-    const [tenants, setTenants] = useState<Tenant[]>([]);
-    const [statusFilter, setStatusFilter] = useState("all");
+  const loadTenants = async () => {
+    const data = await getTenants();
 
+    setTenants(data);
+  };
 
-    useEffect(() => {
+  const filteredTenants = tenants.filter((tenant) => {
+    if (statusFilter === "active") {
+      return tenant.isActive;
+    }
 
+    if (statusFilter === "inactive") {
+      return !tenant.isActive;
+    }
 
-        loadTenants();
+    return true;
+  });
 
+  return (
+    <div>
+      <h1 className="text-3xl font-bold mb-6">Tenants</h1>
 
-    }, []);
+      <select
+        className="border p-2 mb-5"
+        value={statusFilter}
+        onChange={(e) => setStatusFilter(e.target.value)}
+      >
+        <option value="all">All</option>
 
+        <option value="active">Active</option>
 
+        <option value="inactive">Inactive</option>
+      </select>
 
+      <TenantForm onTenantCreated={loadTenants} />
 
-    const loadTenants = async () => {
+      <DataTable columns={["Name", "Phone", "Rent", "Status", "Actions"]}>
+        {filteredTenants.map((tenant) => (
+          <tr key={tenant.id} className="border-b">
+            <td className="p-4">{tenant.fullName}</td>
 
+            <td className="p-4">{tenant.phoneNumber}</td>
 
-        const data = await getTenants();
+            <td className="p-4">Rs {tenant.monthlyRent}</td>
 
+            <td className="p-4">{tenant.isActive ? "Active" : "Inactive"}</td>
 
-        setTenants(data);
-
-
-    };
-
-    const filteredTenants = tenants.filter((tenant) => {
-
-
-        if (statusFilter === "active") {
-
-
-            return tenant.isActive;
-
-
-        }
-
-
-        if (statusFilter === "inactive") {
-
-
-            return !tenant.isActive;
-
-
-        }
-
-
-        return true;
-
-
-    });
-
-
-
-
-    return (
-
-        <div>
-
-
-            <h1 className="text-3xl font-bold mb-6">
-
-                Tenants
-
-            </h1>
-
-            <select
-
-                className="border p-2 mb-5"
-
-                value={statusFilter}
-
-                onChange={(e) =>
-
-                    setStatusFilter(e.target.value)
-
-                }
-
-            >
-
-
-                <option value="all">
-
-                    All
-
-                </option>
-
-
-                <option value="active">
-
-                    Active
-
-                </option>
-
-
-                <option value="inactive">
-
-                    Inactive
-
-                </option>
-
-
-            </select>
-
-            <TenantForm 
-                onTenantCreated={loadTenants}
-            />
-
-            <DataTable
-
-                columns={[
-
-                    "Name",
-
-                    "Phone",
-
-                    "Rent",
-
-                    "Status"
-
-                ]}
-
-            >
-
-
-                {
-
-
-                    filteredTenants.map((tenant) => (
-
-
-                        <tr
-
-                            key={tenant.id}
-
-                            className="border-b"
-
-                        >
-
-
-                            <td className="p-4">
-
-                                {tenant.fullName}
-
-                            </td>
-
-
-
-                            <td className="p-4">
-
-                                {tenant.phoneNumber}
-
-                            </td>
-
-
-
-                            <td className="p-4">
-
-                                Rs {tenant.monthlyRent}
-
-                            </td>
-
-
-                            <td className="p-4">
-
-                                {
-
-                                    tenant.isActive
-
-                                        ? "Active"
-
-                                        : "Inactive"
-
-                                }
-
-                            </td>
-
-
-                        </tr>
-
-
-                    ))
-
-
-                }
-
-
-            </DataTable>
-
-
-        </div>
-
-    );
-
+            <td className="p-4">
+              <Link className="text-blue-600" to={`/tenants/${tenant.id}`}>
+                View
+              </Link>
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+    </div>
+  );
 }
-
 
 export default TenantPage;

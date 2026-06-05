@@ -21,7 +21,7 @@ namespace RentManagementApp.Services
             _context = context;
         }
 
-        public async Task<HouseResponseDto>CreateHouseAsync(CreateHouseRequestDto request)
+        public async Task<HouseResponseDto> CreateHouseAsync(CreateHouseRequestDto request)
         {
             var house = new House
             {

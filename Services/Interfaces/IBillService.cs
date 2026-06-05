@@ -16,7 +16,7 @@ namespace RentManagementApp.Services.Interfaces
         Task<List<BillResponseDto>>
             GetTenantBillsAsync(
                 int tenantId);
-        
+
         Task<List<BillResponseDto>>
             GetAllBillsAsync();
 
@@ -27,10 +27,10 @@ namespace RentManagementApp.Services.Interfaces
         Task<BillResponseDto>
             FinalizeBillAsync(
                 int billId);
-        
+
         Task<BillResponseDto>
             CancelBillAsync(
                 int billId);
-            
+
     }
 }

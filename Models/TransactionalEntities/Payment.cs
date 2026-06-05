@@ -3,7 +3,7 @@ using RentManagementApp.Models.TransactionalEntities;
 
 namespace RentManagementApp.Models.TransactionalEntities
 {
-     public class Payment
+    public class Payment
     {
         public int Id { get; set; }
 

@@ -1,6 +1,6 @@
+using RentManagementApp.Models.Enums;
 using RentManagementApp.Models.RelationshipEntities;
 using RentManagementApp.Models.TransactionalEntities;
-using RentManagementApp.Models.Enums;
 
 namespace RentManagementApp.Models.MasterEntities
 {
@@ -21,9 +21,9 @@ namespace RentManagementApp.Models.MasterEntities
         public House House { get; set; } = null!;
 
         public List<TenantMeter> TenantMeters
-            { get; set; } = new();
+        { get; set; } = new();
 
         public List<MeterReading> MeterReadings
-            { get; set; } = new();
+        { get; set; } = new();
     }
 }

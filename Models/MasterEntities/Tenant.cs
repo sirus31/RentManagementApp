@@ -30,7 +30,7 @@ namespace RentManagementApp.Models.MasterEntities
         public List<TenantRoom> TenantRooms { get; set; }
             = new();
 
-        public List<TenantMeter> TenantMeters { get; set; } 
+        public List<TenantMeter> TenantMeters { get; set; }
             = new();
 
         public List<Bill> Bills { get; set; }

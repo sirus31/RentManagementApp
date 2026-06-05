@@ -31,7 +31,7 @@ namespace RentManagementApp.DTOs.Responses
         public BillStatus BillStatus { get; set; }
 
         public DateTime GeneratedDate { get; set; }
-    
+
         public List<BillDetailResponseDto> BillDetails { get; set; }
             = new();
     }

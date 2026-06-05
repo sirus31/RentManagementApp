@@ -58,7 +58,6 @@ namespace RentManagementApp.Controllers
             return Ok(tenants);
         }
 
-
         [HttpPost("assign-room")]
         public async Task<IActionResult> AssignRoom(AssignRoomRequestDto request)
         {
@@ -75,8 +74,23 @@ namespace RentManagementApp.Controllers
                     .VacateTenantAsync(
                         tenantId);
 
-
             return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+
+        public async Task<IActionResult> GetTenantById(int id)
+        {
+            var tenant = await _tenantService.GetTenantByIdAsync(id);
+
+
+            if (tenant == null)
+            {
+                return NotFound();
+            }
+
+
+            return Ok(tenant);
         }
     }
 }

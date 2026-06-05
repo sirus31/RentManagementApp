@@ -1,42 +1,22 @@
 import api from "../api/axiosConfig";
 
+import type { CreateTenant } from "../models/CreateTenant";
 import type { Tenant } from "../models/Tenant";
 
-import type { CreateTenant } from "../models/CreateTenant";
+export const getTenants = async (): Promise<Tenant[]> => {
+  const response = await api.get<Tenant[]>("/Tenant");
 
-
-
-export const getTenants = async () => {
-
-
-    const response = await api.get<Tenant[]>(
-
-        "/tenant"
-
-    );
-
-
-    return response.data;
-
-
+  return response.data;
 };
 
+export const getTenantById = async (id: number): Promise<Tenant> => {
+  const response = await api.get<Tenant>(`/Tenant/${id}`);
 
+  return response.data;
+};
 
+export const createTenant = async (tenant: CreateTenant): Promise<Tenant> => {
+  const response = await api.post<Tenant>("/Tenant", tenant);
 
-export const createTenant = async (tenant: CreateTenant) => {
-
-
-    const response = await api.post(
-
-        "/tenant",
-
-        tenant
-
-    );
-
-
-    return response.data;
-
-
+  return response.data;
 };

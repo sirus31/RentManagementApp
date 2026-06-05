@@ -445,7 +445,7 @@ namespace RentManagementApp.Services
 
             return results;
         }
-        
+
         public async Task<List<BillResponseDto>>
             GetTenantBillsAsync(
                 int tenantId)

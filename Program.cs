@@ -1,8 +1,8 @@
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using RentManagementApp.Data;
 using RentManagementApp.Services;
 using RentManagementApp.Services.Interfaces;
-using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
