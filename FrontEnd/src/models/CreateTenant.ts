@@ -1,13 +1,7 @@
 export interface CreateTenant {
+  fullName: string;
 
+  phoneNumber: string;
 
-    fullName: string;
-
-
-    phoneNumber: string;
-
-
-    monthlyRent: number;
-
-
+  monthlyRent: number;
 }

@@ -1,16 +1,11 @@
 export interface Tenant {
+  id: number;
 
+  fullName: string;
 
-    id: number;
+  phoneNumber: string;
 
+  monthlyRent: number;
 
-    fullName: string;
-
-
-    phoneNumber: string;
-
-
-    monthlyRent: number;
-
-    isActive: boolean;
+  isActive: boolean;
 }

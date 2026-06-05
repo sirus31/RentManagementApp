@@ -4,9 +4,9 @@ import type { Tenant } from "../models/Tenant";
 
 import { getTenants } from "../services/tenantService";
 
-import DataTable from "../components/DataTable";
+import DataTable from "../components/ui/DataTable";
 
-import TenantForm from "../components/TenantForm";
+import TenantForm from "../components/forms/TenantForm";
 
 import { Link } from "react-router-dom";
 
