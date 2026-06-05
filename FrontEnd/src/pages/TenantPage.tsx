@@ -6,12 +6,13 @@ import { getTenants } from "../services/tenantService";
 
 import DataTable from "../components/DataTable";
 
+import TenantForm from "../components/TenantForm";
 
 function TenantPage() {
 
 
     const [tenants, setTenants] = useState<Tenant[]>([]);
-
+    const [statusFilter, setStatusFilter] = useState("all");
 
 
     useEffect(() => {
@@ -36,6 +37,32 @@ function TenantPage() {
 
     };
 
+    const filteredTenants = tenants.filter((tenant) => {
+
+
+        if (statusFilter === "active") {
+
+
+            return tenant.isActive;
+
+
+        }
+
+
+        if (statusFilter === "inactive") {
+
+
+            return !tenant.isActive;
+
+
+        }
+
+
+        return true;
+
+
+    });
+
 
 
 
@@ -50,8 +77,47 @@ function TenantPage() {
 
             </h1>
 
+            <select
+
+                className="border p-2 mb-5"
+
+                value={statusFilter}
+
+                onChange={(e) =>
+
+                    setStatusFilter(e.target.value)
+
+                }
+
+            >
 
 
+                <option value="all">
+
+                    All
+
+                </option>
+
+
+                <option value="active">
+
+                    Active
+
+                </option>
+
+
+                <option value="inactive">
+
+                    Inactive
+
+                </option>
+
+
+            </select>
+
+            <TenantForm 
+                onTenantCreated={loadTenants}
+            />
 
             <DataTable
 
@@ -61,7 +127,9 @@ function TenantPage() {
 
                     "Phone",
 
-                    "Rent"
+                    "Rent",
+
+                    "Status"
 
                 ]}
 
@@ -71,7 +139,7 @@ function TenantPage() {
                 {
 
 
-                    tenants.map((tenant) => (
+                    filteredTenants.map((tenant) => (
 
 
                         <tr
@@ -102,6 +170,21 @@ function TenantPage() {
                             <td className="p-4">
 
                                 Rs {tenant.monthlyRent}
+
+                            </td>
+
+
+                            <td className="p-4">
+
+                                {
+
+                                    tenant.isActive
+
+                                        ? "Active"
+
+                                        : "Inactive"
+
+                                }
 
                             </td>
 

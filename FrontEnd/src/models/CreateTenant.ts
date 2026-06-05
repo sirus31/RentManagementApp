@@ -1,7 +1,4 @@
-export interface Tenant {
-
-
-    id: number;
+export interface CreateTenant {
 
 
     fullName: string;
@@ -12,5 +9,5 @@ export interface Tenant {
 
     monthlyRent: number;
 
-    isActive: boolean;
+
 }
