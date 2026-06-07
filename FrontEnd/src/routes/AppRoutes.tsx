@@ -8,6 +8,8 @@ import BillPage from "../pages/BillPage";
 import PaymentPage from "../pages/PaymentPage";
 import TenantDetailsPage from "../pages/TenantDetailsPage";
 import HousePage from "../pages/HousePage";
+import HouseDetailsPage from "../pages/HouseDetailsPage";
+import FloorDetailsPage from "../pages/FloorDetailsPage";
 
 function AppRoutes() {
   return (
@@ -24,6 +26,13 @@ function AppRoutes() {
         <Route path="/payments" element={<PaymentPage />} />
 
         <Route path="/houses" element={<HousePage />} />
+
+        <Route path="/houses/:houseId" element={<HouseDetailsPage />} />
+
+        <Route
+          path="/houses/:houseId/floors/:floorId"
+          element={<FloorDetailsPage />}
+        />
       </Route>
     </Routes>
   );
