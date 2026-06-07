@@ -10,6 +10,7 @@ import TenantDetailsPage from "../pages/TenantDetailsPage";
 import HousePage from "../pages/HousePage";
 import HouseDetailsPage from "../pages/HouseDetailsPage";
 import FloorDetailsPage from "../pages/FloorDetailsPage";
+import RoomDetailsPage from "../pages/RoomDetailsPage";
 
 function AppRoutes() {
   return (
@@ -32,6 +33,11 @@ function AppRoutes() {
         <Route
           path="/houses/:houseId/floors/:floorId"
           element={<FloorDetailsPage />}
+        />
+
+        <Route
+          path="/houses/:houseId/floors/:floorId/rooms/:roomId"
+          element={<RoomDetailsPage />}
         />
       </Route>
     </Routes>

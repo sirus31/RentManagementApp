@@ -59,7 +59,12 @@ function FloorDetailsPage() {
 
       <div className="grid grid-cols-3 gap-4">
         {rooms.map((room) => (
-          <Card key={room.id}>
+          <Card
+            key={room.id}
+            onClick={() =>
+              navigate(`/houses/${houseId}/floors/${floorId}/rooms/${room.id}`)
+            }
+          >
             <h3 className="font-bold text-lg ">Room {room.roomNumber}</h3>
           </Card>
         ))}
