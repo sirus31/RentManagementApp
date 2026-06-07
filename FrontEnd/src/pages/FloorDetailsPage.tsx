@@ -6,6 +6,8 @@ import Button from "../components/ui/Button";
 
 import Card from "../components/ui/Card";
 
+import RoomForm from "../components/forms/RoomForm";
+
 import type { Room } from "../models/Room";
 
 import { getRoomsByFloorId } from "../services/roomService";
@@ -48,6 +50,10 @@ function FloorDetailsPage() {
       <h1 className="text-2xl font-bold mt-5 mb-5 ">Floor Details</h1>
 
       <h2 className="text-xl font-semibold mb-3 ">Rooms</h2>
+
+      {floorId && (
+        <RoomForm floorId={Number(floorId)} onRoomCreated={loadRooms} />
+      )}
 
       {error && <p className="text-red-500 mb-3">{error}</p>}
 
