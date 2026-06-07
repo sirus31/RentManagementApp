@@ -94,5 +94,23 @@ namespace RentManagementApp.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("house/{houseId}")]
+
+        public async Task<IActionResult>
+            GetMetersByHouse(
+                int houseId)
+        {
+
+            var meters =
+                await _meterService
+                .GetMetersByHouseAsync(
+                    houseId
+                );
+
+
+            return Ok(meters);
+
+        }
     }
 }

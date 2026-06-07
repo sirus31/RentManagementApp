@@ -26,5 +26,7 @@ namespace RentManagementApp.Services.Interfaces
 
         Task<MeterResponseDto>
             DeactivateMeterAsync(int meterId);
+
+        Task<List<MeterResponseDto>> GetMetersByHouseAsync(int houseId);
     }
 }

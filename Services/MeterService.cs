@@ -50,6 +50,11 @@ namespace RentManagementApp.Services
                     "Meter number already exists");
             }
 
+            if (request.InitialReading < 0)
+            {
+                throw new Exception("Invalid reading");
+            }
+
             var meter = new Meter
             {
                 HouseId =
@@ -188,6 +193,38 @@ namespace RentManagementApp.Services
             };
         }
 
+        public async Task<List<MeterResponseDto>> GetMetersByHouseAsync(
+            int houseId
+        )
+        {
+
+            var meters =
+                await _context.Meters
+                .Where(m =>
+                    m.HouseId == houseId
+                )
+                .Select(m =>
+                    new MeterResponseDto
+                    {
+                        Id = m.Id,
+
+                        HouseId = m.HouseId,
+
+                        MeterNumber = m.MeterNumber,
+
+                        MeterType = m.MeterType,
+
+                        InitialReading = m.InitialReading,
+
+                        IsActive = m.IsActive
+                    }
+                )
+                .ToListAsync();
+
+
+            return meters;
+
+        }
         public async Task<MeterResponseDto>
             UpdateMeterAsync(
                 int meterId,

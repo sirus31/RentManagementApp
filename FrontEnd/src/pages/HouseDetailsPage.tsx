@@ -10,6 +10,12 @@ import type { Floor } from "../models/Floor";
 
 import { getFloorsByHouseId } from "../services/floorService";
 
+import type { Meter } from "../models/Meter";
+
+import MeterForm from "../components/forms/MeterForm";
+
+import { getMetersByHouse } from "../services/meterService";
+
 import FloorForm from "../components/forms/FloorForm";
 
 function HouseDetailsPage() {
@@ -18,6 +24,8 @@ function HouseDetailsPage() {
   const navigate = useNavigate();
 
   const [floors, setFloors] = useState<Floor[]>([]);
+
+  const [meters, setMeters] = useState<Meter[]>([]);
 
   const [error, setError] = useState("");
 
@@ -37,8 +45,15 @@ function HouseDetailsPage() {
     }
   };
 
+  const loadMeters = async () => {
+    const data = await getMetersByHouse(Number(houseId));
+
+    setMeters(data);
+  };
+
   useEffect(() => {
     loadFloors();
+    loadMeters();
   }, [houseId]);
 
   return (
@@ -64,6 +79,24 @@ function HouseDetailsPage() {
             <h3 className=" font-bold text-lg ">{floor.name}</h3>
 
             <p>Floor No: {floor.floorNumber}</p>
+          </Card>
+        ))}
+      </div>
+
+      <h2 className="text-xl font-bold mt-8 mb-4">Meters</h2>
+
+      <MeterForm houseId={Number(houseId)} onMeterCreated={loadMeters} />
+
+      <div className="grid grid-cols-3 gap-4">
+        {meters.map((meter) => (
+          <Card key={meter.id}>
+            <h3 className="font-bold text-lg">{meter.meterNumber}</h3>
+
+            <p>Type: {meter.meterType}</p>
+
+            <p>Initial Reading: {meter.initialReading}</p>
+
+            <p>Status: {meter.isActive ? "Active" : "Inactive"}</p>
           </Card>
         ))}
       </div>
