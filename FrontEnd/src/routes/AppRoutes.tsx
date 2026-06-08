@@ -11,6 +11,7 @@ import HousePage from "../pages/HousePage";
 import HouseDetailsPage from "../pages/HouseDetailsPage";
 import FloorDetailsPage from "../pages/FloorDetailsPage";
 import RoomDetailsPage from "../pages/RoomDetailsPage";
+import MeterPage from "../pages/MeterPage";
 
 function AppRoutes() {
   return (
@@ -27,6 +28,8 @@ function AppRoutes() {
         <Route path="/payments" element={<PaymentPage />} />
 
         <Route path="/houses" element={<HousePage />} />
+
+        <Route path="/meters" element={<MeterPage />} />
 
         <Route path="/houses/:houseId" element={<HouseDetailsPage />} />
 

@@ -327,5 +327,60 @@ namespace RentManagementApp.Services
                     meter.IsActive
             };
         }
+
+        public async Task<List<MeterOverviewResponseDto>> GetMeterOverviewByHouseAsync(int houseId)
+        {
+            return await _context.Meters
+
+
+                .Where(m =>
+                    m.HouseId == houseId
+                )
+
+
+                .Select(m =>
+                    new MeterOverviewResponseDto
+                    {
+                        Id =
+                            m.Id,
+
+
+                        HouseId =
+                            m.HouseId,
+
+
+                        MeterNumber =
+                            m.MeterNumber,
+
+
+                        MeterType =
+                            m.MeterType.ToString(),
+
+
+                        InitialReading =
+                            m.InitialReading,
+
+
+                        IsActive =
+                            m.IsActive,
+
+
+                        AssignedTenants =
+                            m.TenantMeters
+
+                                .Where(tm =>
+                                    tm.EndDate == null
+                                )
+
+                                .Select(tm =>
+                                    tm.Tenant.FullName
+                                )
+
+                                .ToList()
+                    })
+
+
+                .ToListAsync();
+        }
     }
 }
