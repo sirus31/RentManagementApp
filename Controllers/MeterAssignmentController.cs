@@ -24,15 +24,23 @@ namespace RentManagementApp.Controllers
         }
 
         [HttpPost("assign")]
-        public async Task<IActionResult>
-            AssignMeter(
-                AssignMeterRequestDto request)
+        public async Task<IActionResult> AssignMeter(AssignMeterRequestDto request)
         {
-            var response =
-                await _meterAssignmentService
+            try
+            {
+                var response =
+                    await _meterAssignmentService
                     .AssignMeterAsync(request);
 
-            return Ok(response);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(
+                    ex.Message
+                );
+            }
         }
 
         [HttpPost("remove")]

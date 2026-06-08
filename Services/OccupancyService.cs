@@ -5,6 +5,7 @@ using RentManagementApp.Data;
 using RentManagementApp.DTOs.Requests;
 using RentManagementApp.DTOs.Responses;
 
+using RentManagementApp.Models.MasterEntities;
 using RentManagementApp.Models.RelationshipEntities;
 using RentManagementApp.Services.Interfaces;
 
@@ -167,6 +168,184 @@ namespace RentManagementApp.Services
                             tr.EndDate
                     })
                 .ToListAsync();
+        }
+
+
+        public async Task<OccupancyResponseDto>
+    MoveInTenantAsync(
+        MoveInTenantRequestDto request)
+        {
+            if (
+                request.RoomIds == null
+                ||
+                !request.RoomIds.Any()
+            )
+            {
+                throw new Exception(
+                    "At least one room is required");
+            }
+
+
+            using var transaction =
+                await _context.Database
+                    .BeginTransactionAsync();
+
+
+            try
+            {
+                var tenant =
+                    new Tenant
+                    {
+                        FullName =
+                            request.FullName,
+
+                        PhoneNumber =
+                            request.PhoneNumber,
+
+                        MonthlyRent =
+                            request.MonthlyRent,
+
+                        IsActive =
+                            true
+                    };
+
+
+                await _context.Tenants
+                    .AddAsync(tenant);
+
+
+                await _context
+                    .SaveChangesAsync();
+
+
+
+                TenantRoom firstTenantRoom = null!;
+
+
+
+                foreach (var roomId in request.RoomIds)
+                {
+                    var room =
+                        await _context.Rooms
+                            .FirstOrDefaultAsync(r =>
+                                r.Id == roomId);
+
+
+                    if (room == null)
+                    {
+                        throw new Exception(
+                            "Room not found");
+                    }
+
+
+
+                    var roomAlreadyOccupied =
+                        await _context.TenantRooms
+                            .AnyAsync(tr =>
+                                tr.RoomId == roomId
+                                &&
+                                tr.EndDate == null);
+
+
+                    if (roomAlreadyOccupied)
+                    {
+                        throw new Exception(
+                            $"Room {room.RoomNumber} is already occupied");
+                    }
+
+
+
+                    var tenantRoom =
+                        new TenantRoom
+                        {
+                            TenantId =
+                                tenant.Id,
+
+
+                            RoomId =
+                                room.Id,
+
+
+                            StartDate =
+                                DateTime.SpecifyKind(
+                                    request.MoveInDate,
+                                    DateTimeKind.Utc)
+                        };
+
+
+
+                    await _context.TenantRooms
+                        .AddAsync(tenantRoom);
+
+
+
+                    if (firstTenantRoom == null)
+                    {
+                        firstTenantRoom =
+                            tenantRoom;
+                    }
+                }
+
+
+
+                await _context
+                    .SaveChangesAsync();
+
+
+
+                await transaction
+                    .CommitAsync();
+
+
+
+                var assignedRoom =
+                    await _context.Rooms
+                        .FirstAsync(r =>
+                            r.Id ==
+                            firstTenantRoom.RoomId);
+
+
+
+                return new OccupancyResponseDto
+                {
+                    TenantRoomId =
+                        firstTenantRoom.Id,
+
+
+                    TenantId =
+                        tenant.Id,
+
+
+                    TenantName =
+                        tenant.FullName,
+
+
+                    RoomId =
+                        assignedRoom.Id,
+
+
+                    RoomNumber =
+                        assignedRoom.RoomNumber,
+
+
+                    StartDate =
+                        firstTenantRoom.StartDate,
+
+
+                    EndDate =
+                        firstTenantRoom.EndDate
+                };
+            }
+
+
+            catch
+            {
+                await transaction
+                    .RollbackAsync();
+
+
+                throw;
+            }
         }
     }
 }

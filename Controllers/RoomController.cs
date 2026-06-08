@@ -53,5 +53,18 @@ namespace RentManagementApp.Controllers
 
             return Ok(rooms);
         }
+
+        [HttpGet("house/{houseId}/available")]
+        public async Task<IActionResult>
+    GetAvailableRoomsByHouse(
+        int houseId)
+        {
+            var rooms =
+                await _roomService
+                    .GetAvailableRoomsByHouseAsync(
+                        houseId);
+
+            return Ok(rooms);
+        }
     }
 }

@@ -14,5 +14,9 @@ namespace RentManagementApp.Services.Interfaces
 
         Task<List<OccupancyResponseDto>>
             GetActiveOccupanciesAsync();
+
+        Task<OccupancyResponseDto> MoveInTenantAsync(
+        MoveInTenantRequestDto request
+    );
     }
 }

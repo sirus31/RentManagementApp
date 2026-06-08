@@ -6,6 +6,8 @@ import type { AssignRoom } from "../models/AssignRoom";
 
 import type { VacateRoom } from "../models/VacateRoom";
 
+import type { MoveInTenant } from "../models/MoveInTenant";
+
 export const getActiveOccupancies = async (): Promise<Occupancy[]> => {
   const response = await api.get("/Occupancy/active");
 
@@ -22,4 +24,8 @@ export const assignRoom = async (
 
 export const vacateRoom = async (request: VacateRoom): Promise<void> => {
   await api.post("/Occupancy/vacate", request);
+};
+
+export const moveInTenant = async (request: MoveInTenant): Promise<void> => {
+  await api.post("/Occupancy/move-in", request);
 };

@@ -19,5 +19,10 @@ namespace RentManagementApp.Services.Interfaces
         Task<VacateTenantResponseDto> VacateTenantAsync(int tenantId);
 
         Task<TenantResponseDto?> GetTenantByIdAsync(int id);
+
+        Task<List<TenantOverviewResponseDto>>
+            GetTenantOverviewAsync(
+                int houseId
+            );
     }
 }

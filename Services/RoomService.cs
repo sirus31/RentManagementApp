@@ -95,5 +95,37 @@ namespace RentManagementApp.Services
                 })
                 .ToListAsync();
         }
+
+        public async Task<List<RoomResponseDto>>
+    GetAvailableRoomsByHouseAsync(
+        int houseId)
+        {
+            return await _context.Rooms
+
+                .Include(r => r.Floor)
+
+                .Where(r =>
+                    r.Floor.HouseId == houseId
+                    &&
+                    !_context.TenantRooms
+                        .Any(tr =>
+                            tr.RoomId == r.Id
+                            &&
+                            tr.EndDate == null
+                        )
+                )
+
+                .Select(r =>
+                    new RoomResponseDto
+                    {
+                        Id = r.Id,
+
+                        FloorId = r.FloorId,
+
+                        RoomNumber = r.RoomNumber
+                    })
+
+                .ToListAsync();
+        }
     }
 }

@@ -15,3 +15,11 @@ export const createRoom = async (room: CreateRoom): Promise<Room> => {
 
   return response.data;
 };
+
+export const getAvailableRoomsByHouse = async (
+  houseId: number
+): Promise<Room[]> => {
+  const response = await api.get(`/Room/house/${houseId}/available`);
+
+  return response.data;
+};

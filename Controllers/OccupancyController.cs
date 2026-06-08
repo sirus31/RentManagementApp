@@ -55,5 +55,49 @@ namespace RentManagementApp.Controllers
 
             return Ok(occupancies);
         }
+
+        [HttpPost("move-in")]
+        public async Task<IActionResult>
+    MoveInTenant(
+        MoveInTenantRequestDto request)
+        {
+            try
+            {
+                var result =
+                    await _occupancyService
+                        .MoveInTenantAsync(request);
+
+
+                return Ok(result);
+            }
+
+            catch (Exception ex)
+            {
+                return BadRequest(
+                    ex.Message
+                );
+            }
+        }
+
+        // [HttpPost("move-in")]
+        // public async Task<IActionResult> MoveInTenant(MoveInTenantRequestDto request)
+        // {
+        //     try
+        //     {
+        //         await _occupancyService
+        //             .MoveInTenantAsync(
+        //                 request);
+
+
+        //         return Ok(
+        //             "Tenant moved in successfully");
+        //     }
+
+        //     catch (Exception ex)
+        //     {
+        //         return BadRequest(
+        //             ex.Message);
+        //     }
+        // }
     }
 }

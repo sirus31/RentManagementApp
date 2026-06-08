@@ -261,5 +261,78 @@ namespace RentManagementApp.Services
                 IsActive = tenant.IsActive
             };
         }
+
+        public async Task<List<TenantOverviewResponseDto>>
+    GetTenantOverviewAsync(
+        int houseId
+    )
+        {
+            return await _context.Tenants
+
+
+                .Where(t =>
+                    t.TenantRooms.Any(tr =>
+
+                        tr.EndDate == null
+
+                        &&
+
+                        tr.Room.Floor.HouseId == houseId
+
+                    )
+                )
+
+
+                .Select(t => new TenantOverviewResponseDto
+                {
+
+                    TenantId = t.Id,
+
+
+                    TenantName = t.FullName,
+
+
+                    PhoneNumber = t.PhoneNumber,
+
+
+                    MonthlyRent = t.MonthlyRent,
+
+
+                    IsActive = t.IsActive,
+
+
+
+                    Rooms = t.TenantRooms
+
+                        .Where(tr =>
+                            tr.EndDate == null
+                            &&
+                            tr.Room.Floor.HouseId == houseId
+                        )
+
+                        .Select(tr =>
+                            tr.Room.RoomNumber
+                        )
+
+                        .ToList(),
+
+
+
+                    Meters = t.TenantMeters
+
+                        .Where(tm =>
+                            tm.EndDate == null
+                        )
+
+                        .Select(tm =>
+                            tm.Meter.MeterNumber
+                        )
+
+                        .ToList()
+
+                })
+
+                .ToListAsync();
+        }
     }
 }

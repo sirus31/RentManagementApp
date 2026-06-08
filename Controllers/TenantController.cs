@@ -92,5 +92,19 @@ namespace RentManagementApp.Controllers
 
             return Ok(tenant);
         }
+
+        [HttpGet("overview/{houseId}")]
+
+        public async Task<IActionResult> GetTenantOverview(int houseId)
+        {
+            var tenants =
+                await _tenantService
+                .GetTenantOverviewAsync(
+                    houseId
+                );
+
+
+            return Ok(tenants);
+        }
     }
 }
