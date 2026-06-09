@@ -57,9 +57,9 @@ namespace RentManagementApp.Services
                     .AnyAsync(b =>
                         b.TenantId == request.TenantId
                         &&
-                        b.BillingYear == request.BillingYear
+                        b.BillCycle.BillingYear == request.BillingYear
                         &&
-                        b.BillingMonth == request.BillingMonth);
+                        b.BillCycle.BillingMonth == request.BillingMonth);
 
 
             if (billExists)
@@ -279,11 +279,27 @@ namespace RentManagementApp.Services
                     TenantId =
                         tenant.Id,
 
-                    BillingYear =
-                        request.BillingYear,
+                    BillCycle =
+                        new BillCycle
+                        {
+                            HouseId =
+                                house.Id,
 
-                    BillingMonth =
-                        request.BillingMonth,
+                            BillingYear =
+                                request.BillingYear,
+
+                            BillingMonth =
+                                request.BillingMonth,
+
+                            CycleType =
+                                BillCycleType.Monthly,
+
+                            Status =
+                                BillStatus.Generated,
+
+                            GeneratedDate =
+                                DateTime.UtcNow
+                        },
 
                     RentAmount =
                         rentAmount,
@@ -302,12 +318,6 @@ namespace RentManagementApp.Services
 
                     PaymentStatus =
                         PaymentStatus.Pending,
-
-                    BillStatus =
-                        BillStatus.Generated,
-
-                    GeneratedDate =
-                        DateTime.UtcNow,
 
                     BillDetails =
                         billDetails
@@ -352,9 +362,9 @@ namespace RentManagementApp.Services
                         .FirstOrDefaultAsync(b =>
                             b.TenantId == tenant.Id
                             &&
-                            b.BillingYear == request.BillingYear
+                            b.BillCycle.BillingYear == request.BillingYear
                             &&
-                            b.BillingMonth == request.BillingMonth);
+                            b.BillCycle.BillingMonth == request.BillingMonth);
 
 
                 if (existingBill != null)
@@ -455,13 +465,15 @@ namespace RentManagementApp.Services
 
                     .Include(b => b.Tenant)
 
+                    .Include(b => b.BillCycle)
+
                     .Include(b => b.BillDetails)
 
                     .Where(b =>
                         b.TenantId == tenantId)
 
                     .OrderByDescending(b =>
-                        b.GeneratedDate)
+                        b.BillCycle.GeneratedDate)
 
                     .Select(b =>
                         new BillResponseDto
@@ -476,10 +488,10 @@ namespace RentManagementApp.Services
                                 b.Tenant.FullName,
 
                             BillingYear =
-                                b.BillingYear,
+                                b.BillCycle.BillingYear,
 
                             BillingMonth =
-                                b.BillingMonth,
+                                b.BillCycle.BillingMonth,
 
                             RentAmount =
                                 b.RentAmount,
@@ -500,10 +512,10 @@ namespace RentManagementApp.Services
                                 b.PaymentStatus,
 
                             BillStatus =
-                                b.BillStatus,
+                                b.BillCycle.Status,
 
                             GeneratedDate =
-                                b.GeneratedDate,
+                                b.BillCycle.GeneratedDate,
 
                             BillDetails =
                                 b.BillDetails
@@ -548,10 +560,12 @@ namespace RentManagementApp.Services
 
                     .Include(b => b.Tenant)
 
+                    .Include(b => b.BillCycle)
+
                     .Include(b => b.BillDetails)
 
                     .OrderByDescending(b =>
-                        b.GeneratedDate)
+                        b.BillCycle.GeneratedDate)
 
                     .Select(b =>
                         new BillResponseDto
@@ -566,10 +580,10 @@ namespace RentManagementApp.Services
                                 b.Tenant.FullName,
 
                             BillingYear =
-                                b.BillingYear,
+                                b.BillCycle.BillingYear,
 
                             BillingMonth =
-                                b.BillingMonth,
+                                b.BillCycle.BillingMonth,
 
                             RentAmount =
                                 b.RentAmount,
@@ -590,10 +604,10 @@ namespace RentManagementApp.Services
                                 b.PaymentStatus,
 
                             BillStatus =
-                                b.BillStatus,
+                                b.BillCycle.Status,
 
                             GeneratedDate =
-                                b.GeneratedDate,
+                                b.BillCycle.GeneratedDate,
 
                             BillDetails =
                                 b.BillDetails
@@ -639,6 +653,8 @@ namespace RentManagementApp.Services
 
                     .Include(b => b.Tenant)
 
+                    .Include(b => b.BillCycle)
+
                     .Include(b => b.BillDetails)
 
                     .FirstOrDefaultAsync(b =>
@@ -664,10 +680,10 @@ namespace RentManagementApp.Services
                     bill.Tenant.FullName,
 
                 BillingYear =
-                    bill.BillingYear,
+                    bill.BillCycle.BillingYear,
 
                 BillingMonth =
-                    bill.BillingMonth,
+                    bill.BillCycle.BillingMonth,
 
                 RentAmount =
                     bill.RentAmount,
@@ -688,10 +704,10 @@ namespace RentManagementApp.Services
                     bill.PaymentStatus,
 
                 BillStatus =
-                    bill.BillStatus,
+                    bill.BillCycle.Status,
 
                 GeneratedDate =
-                    bill.GeneratedDate,
+                    bill.BillCycle.GeneratedDate,
 
                 BillDetails =
                     bill.BillDetails
@@ -729,6 +745,7 @@ namespace RentManagementApp.Services
         {
             var bill =
                 await _context.Bills
+                    .Include(b => b.BillCycle)
                     .FirstOrDefaultAsync(b =>
                         b.Id == billId);
 
@@ -740,7 +757,7 @@ namespace RentManagementApp.Services
             }
 
 
-            if (bill.BillStatus ==
+            if (bill.BillCycle.Status ==
                 BillStatus.Cancelled)
             {
                 throw new Exception(
@@ -748,7 +765,7 @@ namespace RentManagementApp.Services
             }
 
 
-            if (bill.BillStatus ==
+            if (bill.BillCycle.Status ==
                 BillStatus.Finalized)
             {
                 throw new Exception(
@@ -756,11 +773,11 @@ namespace RentManagementApp.Services
             }
 
 
-            bill.BillStatus =
+            bill.BillCycle.Status =
                 BillStatus.Finalized;
 
 
-            bill.FinalizedDate =
+            bill.BillCycle.FinalizedDate =
                 DateTime.UtcNow;
 
 
@@ -777,6 +794,7 @@ namespace RentManagementApp.Services
         {
             var bill =
                 await _context.Bills
+                    .Include(b => b.BillCycle)
                     .FirstOrDefaultAsync(b =>
                         b.Id == billId);
 
@@ -795,7 +813,7 @@ namespace RentManagementApp.Services
             }
 
 
-            bill.BillStatus =
+            bill.BillCycle.Status =
                 BillStatus.Cancelled;
 
 

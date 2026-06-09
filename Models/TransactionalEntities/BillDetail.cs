@@ -1,4 +1,6 @@
 using RentManagementApp.Models.Enums;
+using RentManagementApp.Models.MasterEntities;
+
 
 namespace RentManagementApp.Models.TransactionalEntities
 {
@@ -7,14 +9,21 @@ namespace RentManagementApp.Models.TransactionalEntities
         public int Id { get; set; }
 
 
+
         public int BillId { get; set; }
 
 
         public BillDetailType DetailType { get; set; }
 
 
+
+        public int? MeterId { get; set; }
+
+
+
         public string Description { get; set; }
             = string.Empty;
+
 
 
         public decimal PreviousReading { get; set; }
@@ -26,13 +35,24 @@ namespace RentManagementApp.Models.TransactionalEntities
         public decimal UnitsConsumed { get; set; }
 
 
+        public decimal TenantUnits { get; set; }
+
+
+        public int SharedTenantCount { get; set; }
+
+
         public decimal Rate { get; set; }
 
 
         public decimal Amount { get; set; }
 
 
+
+
         public Bill Bill { get; set; }
             = null!;
+
+
+        public Meter? Meter { get; set; }
     }
 }

@@ -36,6 +36,8 @@ namespace RentManagementApp.Data
 
         public DbSet<BillDetail> BillDetails { get; set; }
 
+        public DbSet<BillCycle> BillCycles { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -102,6 +104,20 @@ namespace RentManagementApp.Data
                 .Property(bd => bd.Amount)
                 .HasPrecision(18, 2);
 
+            modelBuilder.Entity<Bill>()
+                .Property(b => b.ExtraChargeAmount)
+                .HasPrecision(18, 2);
+
+
+            modelBuilder.Entity<Bill>()
+                .Property(b => b.PreviousDueAmount)
+                .HasPrecision(18, 2);
+
+
+            modelBuilder.Entity<BillDetail>()
+                .Property(bd => bd.TenantUnits)
+                .HasPrecision(18, 2);
+
             // RELATIONSHIP CONFIGURATION
 
             modelBuilder.Entity<Floor>()
@@ -135,6 +151,25 @@ namespace RentManagementApp.Data
                 .WithMany(b => b.BillDetails)
                 .HasForeignKey(bd => bd.BillId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BillDetail>()
+                .HasOne(bd => bd.Meter)
+                .WithMany()
+                .HasForeignKey(bd => bd.MeterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BillCycle>()
+                .HasMany(bc => bc.Bills)
+                .WithOne(b => b.BillCycle)
+                .HasForeignKey(b => b.BillCycleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BillCycle>()
+                .HasOne(bc => bc.House)
+                .WithMany()
+                .HasForeignKey(bc => bc.HouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             // UNIQUE CONSTRAINTS
 

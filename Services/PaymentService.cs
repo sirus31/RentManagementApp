@@ -26,13 +26,20 @@ namespace RentManagementApp.Services
         }
 
 
+
         public async Task<PaymentResponseDto>
             CreatePaymentAsync(
                 CreatePaymentRequestDto request)
         {
+
             var bill = await _context.Bills
+
+                .Include(b =>
+                    b.BillCycle)
+
                 .FirstOrDefaultAsync(b =>
                     b.Id == request.BillId);
+
 
 
             if (bill == null)
@@ -42,7 +49,8 @@ namespace RentManagementApp.Services
             }
 
 
-            if (bill.BillStatus ==
+
+            if (bill.BillCycle.Status ==
                 BillStatus.Cancelled)
             {
                 throw new Exception(
@@ -50,12 +58,14 @@ namespace RentManagementApp.Services
             }
 
 
-            if (bill.BillStatus !=
+
+            if (bill.BillCycle.Status !=
                 BillStatus.Finalized)
             {
                 throw new Exception(
                     "Bill must be finalized before payment");
             }
+
 
 
             if (bill.AmountPaid + request.Amount >
@@ -66,31 +76,41 @@ namespace RentManagementApp.Services
             }
 
 
+
+
             var payment = new Payment
             {
                 BillId =
                     request.BillId,
 
+
                 Amount =
                     request.Amount,
+
 
                 PaymentMode =
                     request.PaymentMode,
 
+
                 Notes =
                     request.Notes,
+
 
                 PaymentDate =
                     DateTime.UtcNow
             };
 
 
+
             await _context.Payments
                 .AddAsync(payment);
 
 
+
             bill.AmountPaid +=
                 request.Amount;
+
+
 
 
             if (bill.AmountPaid ==
@@ -99,14 +119,26 @@ namespace RentManagementApp.Services
                 bill.PaymentStatus =
                     PaymentStatus.Paid;
             }
-            else
+
+
+            else if (bill.AmountPaid > 0)
             {
                 bill.PaymentStatus =
                     PaymentStatus.Partial;
             }
 
 
+            else
+            {
+                bill.PaymentStatus =
+                    PaymentStatus.Pending;
+            }
+
+
+
+
             await _context.SaveChangesAsync();
+
 
 
             return new PaymentResponseDto
@@ -114,20 +146,26 @@ namespace RentManagementApp.Services
                 Id =
                     payment.Id,
 
+
                 BillId =
                     payment.BillId,
+
 
                 BillNumber =
                     bill.BillNumber,
 
+
                 Amount =
                     payment.Amount,
+
 
                 PaymentDate =
                     payment.PaymentDate,
 
+
                 PaymentMode =
                     payment.PaymentMode,
+
 
                 Notes =
                     payment.Notes
@@ -135,90 +173,117 @@ namespace RentManagementApp.Services
         }
 
 
-
         public async Task<List<PaymentResponseDto>>
             GetBillPaymentsAsync(
                 int billId)
         {
+
             var payments =
                 await _context.Payments
 
-                    .Include(p => p.Bill)
+
+                    .Include(p =>
+                        p.Bill)
+
 
                     .Where(p =>
                         p.BillId == billId)
 
+
                     .OrderByDescending(p =>
                         p.PaymentDate)
+
 
                     .Select(p =>
                         new PaymentResponseDto
                         {
-                            Id = p.Id,
+                            Id =
+                                p.Id,
+
 
                             BillId =
                                 p.BillId,
 
+
                             BillNumber =
                                 p.Bill.BillNumber,
+
 
                             Amount =
                                 p.Amount,
 
+
                             PaymentDate =
                                 p.PaymentDate,
 
+
                             PaymentMode =
                                 p.PaymentMode,
+
 
                             Notes =
                                 p.Notes
                         })
 
+
                     .ToListAsync();
+
 
 
             return payments;
         }
 
 
-
         public async Task<List<PaymentResponseDto>>
             GetAllPaymentsAsync()
         {
+
             var payments =
                 await _context.Payments
 
-                    .Include(p => p.Bill)
+
+                    .Include(p =>
+                        p.Bill)
+
 
                     .OrderByDescending(p =>
                         p.PaymentDate)
 
+
                     .Select(p =>
                         new PaymentResponseDto
                         {
-                            Id = p.Id,
+                            Id =
+                                p.Id,
+
 
                             BillId =
                                 p.BillId,
 
+
                             BillNumber =
                                 p.Bill.BillNumber,
+
 
                             Amount =
                                 p.Amount,
 
+
                             PaymentDate =
                                 p.PaymentDate,
 
+
                             PaymentMode =
                                 p.PaymentMode,
+
 
                             Notes =
                                 p.Notes
                         })
 
+
                     .ToListAsync();
+
 
 
             return payments;
