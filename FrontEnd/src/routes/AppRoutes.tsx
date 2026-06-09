@@ -12,6 +12,7 @@ import HouseDetailsPage from "../pages/HouseDetailsPage";
 import FloorDetailsPage from "../pages/FloorDetailsPage";
 import RoomDetailsPage from "../pages/RoomDetailsPage";
 import MeterPage from "../pages/MeterPage";
+import RoomPage from "../pages/RoomPage";
 
 function AppRoutes() {
   return (
@@ -30,6 +31,8 @@ function AppRoutes() {
         <Route path="/houses" element={<HousePage />} />
 
         <Route path="/meters" element={<MeterPage />} />
+
+        <Route path="/rooms" element={<RoomPage />} />
 
         <Route path="/houses/:houseId" element={<HouseDetailsPage />} />
 

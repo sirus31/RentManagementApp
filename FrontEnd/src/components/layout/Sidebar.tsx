@@ -36,6 +36,15 @@ function Sidebar() {
         </NavLink>
 
         <NavLink
+          to="/rooms"
+          className={({ isActive }) =>
+            isActive ? "bg-gray-700 p-2 rounded" : "p-2"
+          }
+        >
+          Rooms
+        </NavLink>
+
+        <NavLink
           to="/meters"
           className={({ isActive }) =>
             isActive ? "bg-gray-700 p-2 rounded" : "p-2"

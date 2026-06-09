@@ -19,5 +19,9 @@ namespace RentManagementApp.Services.Interfaces
         Task<List<RoomResponseDto>>
             GetAvailableRoomsByHouseAsync(
                 int houseId);
+
+        Task<List<RoomOverviewByFloorResponseDto>>
+            GetRoomOverviewByHouseAsync(
+                int houseId);
     }
 }

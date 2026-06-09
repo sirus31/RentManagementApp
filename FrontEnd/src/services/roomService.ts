@@ -4,6 +4,8 @@ import type { Room } from "../models/Room";
 
 import type { CreateRoom } from "../models/CreateRoom";
 
+import type { RoomOverview } from "../models/RoomOverview";
+
 export const getRoomsByFloorId = async (floorId: number): Promise<Room[]> => {
   const response = await api.get(`/Room/floor/${floorId}`);
 
@@ -20,6 +22,14 @@ export const getAvailableRoomsByHouse = async (
   houseId: number
 ): Promise<Room[]> => {
   const response = await api.get(`/Room/house/${houseId}/available`);
+
+  return response.data;
+};
+
+export const getRoomOverviewByHouse = async (
+  houseId: number
+): Promise<RoomOverview[]> => {
+  const response = await api.get(`/Room/overview/${houseId}`);
 
   return response.data;
 };

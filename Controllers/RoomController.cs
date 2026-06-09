@@ -56,8 +56,8 @@ namespace RentManagementApp.Controllers
 
         [HttpGet("house/{houseId}/available")]
         public async Task<IActionResult>
-    GetAvailableRoomsByHouse(
-        int houseId)
+        GetAvailableRoomsByHouse(
+            int houseId)
         {
             var rooms =
                 await _roomService
@@ -65,6 +65,31 @@ namespace RentManagementApp.Controllers
                         houseId);
 
             return Ok(rooms);
+        }
+
+        [HttpGet("overview/{houseId}")]
+        public async Task<IActionResult>
+            GetRoomOverviewByHouse(
+                int houseId)
+        {
+            try
+            {
+                var rooms =
+                    await _roomService
+                        .GetRoomOverviewByHouseAsync(
+                            houseId);
+
+
+                return Ok(
+                    rooms);
+            }
+
+
+            catch (Exception ex)
+            {
+                return BadRequest(
+                    ex.Message);
+            }
         }
     }
 }

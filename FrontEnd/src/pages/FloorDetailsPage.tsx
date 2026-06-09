@@ -52,7 +52,12 @@ function FloorDetailsPage() {
       <h2 className="text-xl font-semibold mb-3 ">Rooms</h2>
 
       {floorId && (
-        <RoomForm floorId={Number(floorId)} onRoomCreated={loadRooms} />
+        <RoomForm
+          floorId={Number(floorId)}
+          onRoomCreated={() => {
+            loadRooms();
+          }}
+        />
       )}
 
       {error && <p className="text-red-500 mb-3">{error}</p>}

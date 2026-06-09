@@ -97,8 +97,8 @@ namespace RentManagementApp.Services
         }
 
         public async Task<List<RoomResponseDto>>
-    GetAvailableRoomsByHouseAsync(
-        int houseId)
+            GetAvailableRoomsByHouseAsync(
+                int houseId)
         {
             return await _context.Rooms
 
@@ -126,6 +126,90 @@ namespace RentManagementApp.Services
                     })
 
                 .ToListAsync();
+        }
+
+        public async Task<List<RoomOverviewByFloorResponseDto>> GetRoomOverviewByHouseAsync(int houseId)
+        {
+            var floors =
+                await _context.Floors
+
+                    .Include(f =>
+                        f.Rooms)
+
+                        .ThenInclude(r =>
+                            r.TenantRooms)
+
+                            .ThenInclude(tr =>
+                                tr.Tenant)
+
+                    .Where(f =>
+                        f.HouseId == houseId)
+
+                    .Select(f =>
+                        new RoomOverviewByFloorResponseDto
+                        {
+                            FloorId =
+                                f.Id,
+
+
+                            FloorName =
+                                f.Name,
+
+
+                            TotalRooms =
+                                f.Rooms.Count,
+
+
+                            OccupiedRooms =
+                                f.Rooms.Count(r =>
+                                    r.TenantRooms.Any(tr =>
+                                        tr.EndDate == null)),
+
+
+                            VacantRooms =
+                                f.Rooms.Count(r =>
+                                    !r.TenantRooms.Any(tr =>
+                                        tr.EndDate == null)),
+
+
+                            Rooms =
+                                f.Rooms
+
+                                    .Select(r =>
+                                        new RoomOverviewResponseDto
+                                        {
+                                            RoomId =
+                                                r.Id,
+
+
+                                            RoomNumber =
+                                                r.RoomNumber,
+
+
+                                            IsOccupied =
+                                                r.TenantRooms.Any(tr =>
+                                                    tr.EndDate == null),
+
+
+                                            TenantName =
+                                                r.TenantRooms
+
+                                                    .Where(tr =>
+                                                        tr.EndDate == null)
+
+                                                    .Select(tr =>
+                                                        tr.Tenant.FullName)
+
+                                                    .FirstOrDefault()
+                                        })
+
+                                    .ToList()
+                        })
+
+                    .ToListAsync();
+
+
+            return floors;
         }
     }
 }
