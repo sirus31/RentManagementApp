@@ -17,7 +17,7 @@ import { getHouses } from "../../services/houseService";
 type Props = {
   houseId?: number;
 
-  onMeterCreated: () => void;
+  onMeterCreated: (houseId: number) => void;
 };
 
 function MeterForm({ houseId, onMeterCreated }: Props) {
@@ -99,7 +99,7 @@ function MeterForm({ houseId, onMeterCreated }: Props) {
 
       resetMeter();
 
-      onMeterCreated();
+      onMeterCreated(meter.houseId);
     } catch (error) {
       console.log(error);
 

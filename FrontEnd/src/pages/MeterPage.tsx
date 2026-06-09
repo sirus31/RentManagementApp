@@ -31,6 +31,14 @@ function MeterPage() {
     const data = await getHouses();
 
     setHouses(data);
+
+    if (data.length > 0) {
+      const firstHouseId = data[0].id;
+
+      setSelectedHouseId(firstHouseId);
+
+      loadMeters(firstHouseId);
+    }
   };
 
   const loadMeters = async (houseId: number) => {
@@ -96,10 +104,8 @@ function MeterPage() {
       </div>
 
       <MeterForm
-        onMeterCreated={() => {
-          if (selectedHouseId !== 0) {
-            loadMeters(selectedHouseId);
-          }
+        onMeterCreated={(houseId) => {
+          loadMeters(houseId);
         }}
       />
 

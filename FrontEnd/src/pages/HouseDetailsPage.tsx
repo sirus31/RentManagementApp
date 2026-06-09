@@ -85,7 +85,12 @@ function HouseDetailsPage() {
 
       <h2 className="text-xl font-bold mt-8 mb-4">Meters</h2>
 
-      <MeterForm houseId={Number(houseId)} onMeterCreated={loadMeters} />
+      <MeterForm
+        houseId={Number(houseId)}
+        onMeterCreated={() => {
+          loadMeters();
+        }}
+      />
 
       <div className="grid grid-cols-3 gap-4">
         {meters.map((meter) => (
