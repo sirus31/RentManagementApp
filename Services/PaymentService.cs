@@ -131,7 +131,7 @@ namespace RentManagementApp.Services
             else
             {
                 bill.PaymentStatus =
-                    PaymentStatus.Pending;
+                    PaymentStatus.Unpaid;
             }
 
 

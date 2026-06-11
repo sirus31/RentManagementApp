@@ -317,7 +317,7 @@ namespace RentManagementApp.Services
                         0,
 
                     PaymentStatus =
-                        PaymentStatus.Pending,
+                        PaymentStatus.Unpaid,
 
                     BillDetails =
                         billDetails
@@ -822,6 +822,1066 @@ namespace RentManagementApp.Services
 
             return await GetBillByIdAsync(
                 bill.Id);
+        }
+
+        public async Task<List<BillCycleOverviewResponseDto>> GetBillCyclesByHouseAsync(int houseId)
+        {
+            var cycles =
+                await _context.BillCycles
+
+                    .Include(bc =>
+                        bc.Bills)
+
+                        .ThenInclude(b =>
+                            b.Tenant)
+
+                            .ThenInclude(t =>
+                                t.TenantRooms)
+
+                                .ThenInclude(tr =>
+                                    tr.Room)
+
+                    .Where(bc =>
+                        bc.HouseId == houseId)
+
+                    .OrderByDescending(bc =>
+                        bc.GeneratedDate)
+
+                    .Select(bc =>
+                        new BillCycleOverviewResponseDto
+                        {
+                            Id =
+                                bc.Id,
+
+
+                            BillingYear =
+                                bc.BillingYear,
+
+
+                            BillingMonth =
+                                bc.BillingMonth,
+
+
+                            CycleType =
+                                bc.CycleType,
+
+
+                            Status =
+                                bc.Status,
+
+
+                            GeneratedDate =
+                                bc.GeneratedDate,
+
+
+
+
+                            TotalBills =
+                                bc.Bills.Count,
+
+
+
+                            TotalAmount =
+                                bc.Bills.Sum(
+                                    b => b.TotalAmount),
+
+
+
+                            PaidAmount =
+                                bc.Bills.Sum(
+                                    b => b.AmountPaid),
+
+
+
+                            PendingAmount =
+                                bc.Bills.Sum(
+                                    b =>
+                                        b.TotalAmount
+                                        -
+                                        b.AmountPaid),
+
+
+
+                            PaidCount =
+                                bc.Bills.Count(
+                                    b =>
+                                        b.PaymentStatus
+                                        ==
+                                        PaymentStatus.Paid),
+
+
+
+                            PartialCount =
+                                bc.Bills.Count(
+                                    b =>
+                                        b.PaymentStatus
+                                        ==
+                                        PaymentStatus.Partial),
+
+
+
+                            PendingCount =
+                                bc.Bills.Count(
+                                    b =>
+                                        b.PaymentStatus
+                                        ==
+                                        PaymentStatus.Unpaid),
+
+
+
+
+
+                            Bills =
+                                bc.Bills.Select(
+                                    b =>
+                                        new BillCycleTenantBillDto
+                                        {
+                                            BillId =
+                                                b.Id,
+
+
+                                            TenantName =
+                                                b.Tenant.FullName,
+
+
+                                            Rooms =
+                                                b.Tenant.TenantRooms
+
+                                                    .Where(tr =>
+                                                        tr.EndDate == null)
+
+                                                    .Select(tr =>
+                                                        tr.Room.RoomNumber)
+
+                                                    .ToList(),
+
+
+
+                                            RentAmount =
+                                                b.RentAmount,
+
+
+                                            ElectricityAmount =
+                                                b.ElectricityAmount,
+
+
+                                            GarbageAmount =
+                                                b.GarbageAmount,
+
+
+                                            ExtraChargeAmount =
+                                                b.ExtraChargeAmount,
+
+
+                                            PreviousDueAmount =
+                                                b.PreviousDueAmount,
+
+
+                                            TotalAmount =
+                                                b.TotalAmount,
+
+
+                                            AmountPaid =
+                                                b.AmountPaid,
+
+
+                                            PendingAmount =
+                                                b.TotalAmount
+                                                -
+                                                b.AmountPaid,
+
+
+                                            PaymentStatus =
+                                                b.PaymentStatus
+                                        })
+
+                                .ToList()
+                        })
+
+
+                    .ToListAsync();
+
+
+            return cycles;
+        }
+
+        public async Task<BillFullDetailResponseDto?> GetBillDetailsAsync(
+    int billId
+)
+        {
+            var bill = await _context.Bills
+
+
+                .Include(bill =>
+                    bill.Tenant)
+
+                    .ThenInclude(tenant =>
+                        tenant.TenantRooms)
+
+                        .ThenInclude(tenantRoom =>
+                            tenantRoom.Room)
+
+
+                .Include(bill =>
+                    bill.BillCycle)
+
+
+                .Include(bill =>
+                    bill.BillDetails)
+
+
+                .FirstOrDefaultAsync(
+                    bill =>
+                        bill.Id == billId
+                );
+
+
+            if (bill == null)
+            {
+                return null;
+            }
+
+
+            return new BillFullDetailResponseDto
+            {
+                BillId =
+                    bill.Id,
+
+
+                BillNumber =
+                    bill.BillNumber,
+
+
+                TenantName =
+                    bill.Tenant.FullName,
+
+
+                Rooms =
+                    bill.Tenant.TenantRooms
+
+                        .Where(tenantRoom =>
+                            tenantRoom.EndDate == null)
+
+                        .Select(tenantRoom =>
+                            tenantRoom.Room.RoomNumber)
+
+                        .ToList(),
+
+
+
+                BillingMonth =
+                    bill.BillCycle.BillingMonth.ToString(),
+
+
+                BillingYear =
+                    bill.BillCycle.BillingYear,
+
+
+
+                RentAmount =
+                    bill.RentAmount,
+
+
+                ElectricityAmount =
+                    bill.ElectricityAmount,
+
+
+                GarbageAmount =
+                    bill.GarbageAmount,
+
+
+                ExtraChargeAmount =
+                    bill.ExtraChargeAmount,
+
+
+                PreviousDueAmount =
+                    bill.PreviousDueAmount,
+
+
+                TotalAmount =
+                    bill.TotalAmount,
+
+
+                AmountPaid =
+                    bill.AmountPaid,
+
+
+                PendingAmount =
+                    bill.TotalAmount
+                    -
+                    bill.AmountPaid,
+
+
+
+                Details =
+                    bill.BillDetails
+
+                        .Select(detail =>
+                            new BillDetailResponseDto
+                            {
+                                DetailType =
+                                    detail.DetailType,
+
+
+                                Description =
+                                    detail.Description,
+
+
+                                PreviousReading =
+                                    detail.PreviousReading,
+
+
+                                CurrentReading =
+                                    detail.CurrentReading,
+
+
+                                UnitsConsumed =
+                                    detail.UnitsConsumed,
+
+
+                                Rate =
+                                    detail.Rate,
+
+
+                                Amount =
+                                    detail.Amount
+                            })
+
+                        .ToList()
+            };
+        }
+
+        public async Task<GenerateBillInfoResponseDto> GetGenerateBillInfoAsync(int houseId)
+        {
+            var house =
+                await _context.Houses
+
+                    .Include(house =>
+                        house.Floors)
+
+                        .ThenInclude(floor =>
+                            floor.Rooms)
+
+                            .ThenInclude(room =>
+                                room.TenantRooms)
+
+                                .ThenInclude(tenantRoom =>
+                                    tenantRoom.Tenant)
+
+                                    .ThenInclude(tenant =>
+                                        tenant.TenantMeters)
+
+                                        .ThenInclude(tenantMeter =>
+                                            tenantMeter.Meter)
+
+
+                    .Include(house =>
+                        house.Meters)
+
+
+                    .FirstOrDefaultAsync(
+                        house =>
+                            house.Id == houseId
+                    );
+
+
+            if (house == null)
+            {
+                throw new Exception(
+                    "House not found"
+                );
+            }
+
+
+
+            var tenants =
+                house.Floors
+
+                    .SelectMany(floor =>
+                        floor.Rooms)
+
+                    .SelectMany(room =>
+                        room.TenantRooms)
+
+                    .Where(tenantRoom =>
+                        tenantRoom.EndDate == null)
+
+                    .GroupBy(tenantRoom =>
+                        tenantRoom.Tenant)
+
+                    .Select(group =>
+                        new GenerateBillTenantDto
+                        {
+                            TenantId =
+                                group.Key.Id,
+
+
+                            TenantName =
+                                group.Key.FullName,
+
+
+                            Rooms =
+                                group
+
+                                    .Select(tenantRoom =>
+                                        tenantRoom.Room.RoomNumber)
+
+                                    .ToList(),
+
+
+                            MonthlyRent =
+                                group.Key.MonthlyRent,
+
+
+                            Meters =
+                                group.Key.TenantMeters
+
+                                    .Select(tenantMeter =>
+                                        tenantMeter.Meter.MeterNumber)
+
+                                    .ToList()
+                        })
+
+                    .ToList();
+
+
+
+
+            var meters =
+                house.Meters
+
+                    .Select(meter =>
+                        new GenerateBillMeterDto
+                        {
+                            MeterId =
+                                meter.Id,
+
+
+                            MeterNumber =
+                                meter.MeterNumber,
+
+
+                            MeterType =
+                                meter.MeterType.ToString(),
+
+
+                            PreviousReading =
+                                _context.MeterReadings
+
+                                    .Where(reading =>
+                                        reading.MeterId
+                                        ==
+                                        meter.Id)
+
+                                    .OrderByDescending(reading =>
+                                        reading.ReadingDate)
+
+                                    .Select(reading =>
+                                        reading.ReadingValue)
+
+                                    .FirstOrDefault()
+                        })
+
+                    .ToList();
+
+            var previousDues =
+            await _context.Bills
+
+                .Include(bill =>
+                    bill.Tenant)
+
+                .Include(bill =>
+                    bill.BillCycle)
+
+                .Where(bill =>
+                    bill.BillCycle.HouseId == houseId
+                    &&
+                    bill.TotalAmount - bill.AmountPaid > 0)
+
+                .Select(bill =>
+                    new GenerateBillPreviousDueDto
+                    {
+                        TenantId =
+                            bill.TenantId,
+
+
+                        TenantName =
+                            bill.Tenant.FullName,
+
+
+                        BillingMonth =
+                            bill.BillCycle.BillingMonth.ToString(),
+
+
+                        BillingYear =
+                            bill.BillCycle.BillingYear,
+
+
+                        DueAmount =
+                            bill.TotalAmount
+                            -
+                            bill.AmountPaid
+                    })
+
+        .ToListAsync();
+
+
+            return new GenerateBillInfoResponseDto
+            {
+                House =
+                    new GenerateBillHouseDto
+                    {
+                        Id =
+                            house.Id,
+
+
+                        Name =
+                            house.Name,
+
+
+                        Address =
+                            house.Address,
+
+
+                        ElectricityRate =
+                            house.ElectricityRate,
+
+
+                        GarbageFee =
+                            house.GarbageFee
+                    },
+
+
+                Tenants =
+                    tenants,
+
+
+                Meters =
+                    meters,
+
+                PreviousDues = previousDues
+            };
+        }
+
+        public async Task<List<GenerateBillResultDto>> GenerateMonthlyBillAsync(GenerateMonthlyBillRequestDto request)
+        {
+            var results =
+                new List<GenerateBillResultDto>();
+
+            var existingCycle =
+                await _context.BillCycles
+
+                    .AnyAsync(bc =>
+                        bc.HouseId == request.HouseId
+                        &&
+                        bc.BillingYear == request.BillingYear
+                        &&
+                        bc.BillingMonth == request.BillingMonth);
+
+            if (existingCycle)
+            {
+                throw new Exception(
+                    "Bills already generated for this month"
+                );
+            }
+
+            foreach (var reading in request.MeterReadings)
+            {
+                var meterReading =
+                    new MeterReading
+                    {
+                        MeterId =
+                            reading.MeterId,
+
+
+                        ReadingValue =
+                            reading.ReadingValue,
+
+
+                        BillingMonth =
+                            request.BillingMonth,
+
+
+                        BillingYear =
+                            request.BillingYear,
+
+
+                        ReadingDate =
+                            DateTime.UtcNow
+                    };
+
+                await _context.MeterReadings
+                    .AddAsync(meterReading);
+            }
+
+            var billCycle =
+                new BillCycle
+                {
+                    HouseId =
+                        request.HouseId,
+
+
+                    BillingMonth =
+                        request.BillingMonth,
+
+
+                    BillingYear =
+                        request.BillingYear,
+
+
+                    CycleType =
+                        BillCycleType.Monthly,
+
+
+                    Status =
+                        BillStatus.Generated,
+
+
+                    GeneratedDate =
+                        DateTime.UtcNow
+                };
+
+            await _context.BillCycles
+                .AddAsync(billCycle);
+
+            await _context.SaveChangesAsync();
+
+            var tenants =
+                await _context.Tenants
+
+                    .Include(t => t.TenantRooms)
+
+                        .ThenInclude(tr => tr.Room)
+
+                    .Where(t =>
+                        t.TenantRooms.Any(tr =>
+                            tr.EndDate == null
+                            &&
+                            tr.Room.Floor.HouseId
+                                == request.HouseId))
+
+                    .ToListAsync();
+
+            foreach (var tenant in tenants)
+            {
+                try
+                {
+                    decimal rentAmount =
+                        tenant.MonthlyRent;
+
+                    var house =
+                        await _context.Houses
+
+                            .FirstAsync(h =>
+                                h.Id == request.HouseId);
+
+                    decimal garbageAmount =
+                        house.GarbageFee;
+
+                    decimal electricityAmount =
+                        0;
+
+                    decimal extraChargeAmount =
+                        0;
+
+                    var billDetails =
+                        new List<BillDetail>();
+
+                    billDetails.Add(
+
+                        new BillDetail
+                        {
+                            DetailType =
+                                BillDetailType.Rent,
+
+                            Description =
+                                "Monthly room rent",
+
+                            Amount =
+                                rentAmount
+                        });
+
+                    var tenantMeters =
+                        await _context.TenantMeters
+
+                            .Include(tm => tm.Meter)
+
+                            .Where(tm =>
+                                tm.TenantId == tenant.Id
+                                &&
+                                tm.EndDate == null)
+
+                            .ToListAsync();
+
+                    foreach (var tenantMeter in tenantMeters)
+                    {
+
+                        var currentReading =
+                            await _context.MeterReadings
+
+                                .Where(mr =>
+                                    mr.MeterId
+                                        ==
+                                        tenantMeter.MeterId
+                                    &&
+                                    mr.BillingMonth
+                                        ==
+                                        request.BillingMonth
+                                    &&
+                                    mr.BillingYear
+                                        ==
+                                        request.BillingYear)
+
+                                .FirstAsync();
+
+                        var previousReading =
+                            await _context.MeterReadings
+
+                                .Where(mr =>
+                                    mr.MeterId
+                                        ==
+                                        tenantMeter.MeterId
+                                    &&
+                                    mr.ReadingDate
+                                        <
+                                        currentReading.ReadingDate)
+
+                                .OrderByDescending(
+                                    mr => mr.ReadingDate)
+
+                                .FirstOrDefaultAsync();
+
+                        decimal previousValue =
+                            previousReading?.ReadingValue
+                            ??
+                            tenantMeter.Meter.InitialReading;
+
+                        decimal units =
+                            currentReading.ReadingValue
+                            -
+                            previousValue;
+
+
+
+                        if (currentReading.ReadingValue < previousValue)
+                        {
+                            throw new Exception(
+                                $"Current reading for meter {tenantMeter.Meter.MeterNumber} cannot be less than previous reading"
+                            );
+                        }
+
+                        decimal tenantUnits =
+                            units;
+
+                        int sharedTenantCount =
+                            1;
+
+                        if (
+                            tenantMeter.Meter.MeterType
+                            ==
+                            MeterType.Shared
+                        )
+                        {
+                            sharedTenantCount =
+                                await _context.TenantMeters
+
+                                    .CountAsync(tm =>
+                                        tm.MeterId
+                                            ==
+                                            tenantMeter.MeterId
+                                        &&
+                                        tm.EndDate == null);
+
+
+
+                            tenantUnits =
+                                units
+                                /
+                                sharedTenantCount;
+                        }
+
+                        decimal amount =
+                            tenantUnits
+                            *
+                            house.ElectricityRate;
+
+                        electricityAmount +=
+                            amount;
+
+                        billDetails.Add(
+
+                            new BillDetail
+                            {
+                                DetailType =
+                                    BillDetailType.Electricity,
+
+                                MeterId =
+                                    tenantMeter.MeterId,
+
+                                Description =
+                                    tenantMeter.Meter.MeterNumber,
+
+                                PreviousReading =
+                                    previousValue,
+
+                                CurrentReading =
+                                    currentReading.ReadingValue,
+
+                                UnitsConsumed =
+                                    units,
+
+                                TenantUnits =
+                                    tenantUnits,
+
+                                SharedTenantCount =
+                                    sharedTenantCount,
+
+                                Rate =
+                                    house.ElectricityRate,
+
+                                Amount =
+                                    amount
+                            });
+
+                    }
+
+                    billDetails.Add(
+
+                        new BillDetail
+                        {
+                            DetailType =
+                                BillDetailType.Garbage,
+
+                            Description =
+                                "Monthly garbage charge",
+
+                            Amount =
+                                garbageAmount
+                        });
+
+                    foreach (var charge in request.ExtraCharges)
+                    {
+
+                        if (
+                            charge.TenantIds.Contains(
+                                tenant.Id
+                            )
+                        )
+                        {
+
+                            decimal splitAmount =
+                                charge.Amount
+                                /
+                                charge.TenantIds.Count;
+
+                            extraChargeAmount +=
+                                splitAmount;
+
+                            billDetails.Add(
+
+                                new BillDetail
+                                {
+                                    DetailType =
+                                        BillDetailType.Maintenance,
+
+                                    Description =
+                                        charge.ChargeName,
+
+                                    Amount =
+                                        splitAmount
+                                });
+
+                        }
+
+                    }
+
+                    decimal total =
+                        rentAmount
+                        +
+                        electricityAmount
+                        +
+                        garbageAmount
+                        +
+                        extraChargeAmount;
+
+                    var bill =
+                        new Bill
+                        {
+                            BillNumber =
+                                $"BILL-{request.BillingYear}-{Guid.NewGuid().ToString()[..6]}",
+
+                            BillCycleId =
+                                billCycle.Id,
+
+                            TenantId =
+                                tenant.Id,
+
+                            RentAmount =
+                                rentAmount,
+
+                            ElectricityAmount =
+                                electricityAmount,
+
+                            GarbageAmount =
+                                garbageAmount,
+
+                            ExtraChargeAmount =
+                                extraChargeAmount,
+
+                            PreviousDueAmount =
+                                0,
+
+                            TotalAmount =
+                                total,
+
+                            AmountPaid =
+                                0,
+
+                            PaymentStatus =
+                                PaymentStatus.Unpaid,
+
+                            BillDetails =
+                                billDetails
+                        };
+
+                    await _context.Bills
+                        .AddAsync(bill);
+
+                    results.Add(
+                        new GenerateBillResultDto
+                        {
+                            TenantId =
+                                tenant.Id,
+
+                            TenantName =
+                                tenant.FullName,
+
+                            Status =
+                                "Generated",
+
+                            Message =
+                                "Bill generated successfully",
+
+                            BillCycleId = billCycle.Id
+
+                        });
+
+                }
+
+                catch (Exception ex)
+                {
+                    results.Add(
+                        new GenerateBillResultDto
+                        {
+                            TenantId =
+                                tenant.Id,
+
+                            TenantName =
+                                tenant.FullName,
+
+                            Status =
+                                "Failed",
+
+                            Message =
+                                ex.Message,
+
+                            BillCycleId =
+                            billCycle.Id
+                        });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return results;
+        }
+
+        public async Task<BillCycleValidationResponseDto>
+    ValidateBillCycleAsync(
+        int houseId,
+        int month,
+        int year)
+        {
+            var existingCycle =
+                await _context.BillCycles
+
+                    .AnyAsync(bc =>
+                        bc.HouseId == houseId
+                        &&
+                        (int)bc.BillingMonth == month
+                        &&
+                        bc.BillingYear == year);
+
+
+
+            if (existingCycle)
+            {
+                return new BillCycleValidationResponseDto
+                {
+                    IsValid = false,
+
+
+                    Message =
+                        "Bill already generated for selected month and year"
+                };
+            }
+
+
+
+
+
+            var latestCycle =
+                await _context.BillCycles
+
+                    .Where(bc =>
+                        bc.HouseId == houseId)
+
+                    .OrderByDescending(bc =>
+                        bc.BillingYear)
+
+                    .ThenByDescending(bc =>
+                        bc.BillingMonth)
+
+                    .FirstOrDefaultAsync();
+
+
+
+
+            if (latestCycle != null)
+            {
+
+                bool isOlderCycle =
+                    year < latestCycle.BillingYear
+                    ||
+                    (
+                        year == latestCycle.BillingYear
+                        &&
+                        month < (int)latestCycle.BillingMonth
+                    );
+
+
+
+                if (isOlderCycle)
+                {
+                    return new BillCycleValidationResponseDto
+                    {
+                        IsValid = false,
+
+
+                        Message =
+                            $"Cannot generate bill before latest cycle {latestCycle.BillingMonth} {latestCycle.BillingYear}"
+                    };
+                }
+
+            }
+
+
+
+
+            return new BillCycleValidationResponseDto
+            {
+                IsValid = true
+            };
         }
     }
 }

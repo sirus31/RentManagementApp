@@ -184,7 +184,20 @@ function RoomPage() {
             </span>
           </div>
 
-          {expandedFloors.includes(floor.floorId) && (
+          <div
+            className={`
+    overflow-hidden
+    transition-all
+    duration-300
+    ease-in-out
+
+    ${
+      expandedFloors.includes(floor.floorId)
+        ? "max-h-200 opacity-100"
+        : "max-h-0 opacity-0"
+    }
+  `}
+          >
             <DataTable columns={["Room", "Status", "Tenant"]}>
               {floor.rooms
 
@@ -212,7 +225,7 @@ function RoomPage() {
                   </tr>
                 ))}
             </DataTable>
-          )}
+          </div>
         </div>
       ))}
     </div>

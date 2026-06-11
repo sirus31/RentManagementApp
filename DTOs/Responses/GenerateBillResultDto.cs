@@ -18,5 +18,8 @@ namespace RentManagementApp.DTOs.Responses
 
 
         public int? BillId { get; set; }
+
+
+        public int BillCycleId { get; set; }
     }
 }

@@ -6,8 +6,6 @@ namespace RentManagementApp.Models.Enums
 
         Partial = 1,
 
-        Paid = 2,
-
-        Pending = 3
+        Paid = 2
     }
 }

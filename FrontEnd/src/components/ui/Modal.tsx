@@ -27,7 +27,9 @@ function Modal({ title, children, onClose }: ModalProps) {
 
         p-6
 
-        w-[400px]
+        w-150
+        max-h-[80vh]
+        overflow-y-auto
 
         shadow-lg
         "

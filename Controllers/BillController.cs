@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 using RentManagementApp.DTOs.Requests;
+using RentManagementApp.DTOs.Responses;
 
 using RentManagementApp.Services.Interfaces;
 
@@ -105,6 +106,96 @@ namespace RentManagementApp.Controllers
                 await _billService
                     .GenerateAllBillsAsync(
                         request);
+
+
+            return Ok(result);
+        }
+
+        [HttpGet("house/{houseId}/cycles")]
+        public async Task<IActionResult>
+            GetBillCyclesByHouse(
+                int houseId)
+        {
+            var cycles =
+                await _billService
+                    .GetBillCyclesByHouseAsync(
+                        houseId);
+
+            return Ok(cycles);
+        }
+
+        [HttpGet("{billId}/details")]
+        public async Task<ActionResult<BillFullDetailResponseDto>> GetBillDetails(int billId)
+        {
+            var result =
+                await _billService.GetBillDetailsAsync(billId);
+
+
+            if (result == null)
+            {
+                return NotFound(
+                    "Bill not found"
+                );
+            }
+
+
+            return Ok(result);
+        }
+
+        [HttpGet("generate-info/{houseId}")]
+        public async Task<ActionResult<GenerateBillInfoResponseDto>>
+    GetGenerateBillInfo(
+        int houseId
+    )
+        {
+            var result =
+                await _billService.GetGenerateBillInfoAsync(
+                    houseId
+                );
+
+
+            return Ok(result);
+        }
+
+        [HttpPost("generate-monthly")]
+        public async Task<IActionResult>
+    GenerateMonthlyBill(
+        GenerateMonthlyBillRequestDto request)
+        {
+            try
+            {
+                var result =
+                    await _billService
+                        .GenerateMonthlyBillAsync(
+                            request
+                        );
+
+
+                return Ok(result);
+            }
+
+
+            catch (Exception ex)
+            {
+                return BadRequest(
+                    ex.Message
+                );
+            }
+        }
+
+        [HttpGet("validate-cycle")]
+        public async Task<IActionResult>
+    ValidateBillCycle(
+        int houseId,
+        int month,
+        int year)
+        {
+            var result =
+                await _billService
+                    .ValidateBillCycleAsync(
+                        houseId,
+                        month,
+                        year);
 
 
             return Ok(result);

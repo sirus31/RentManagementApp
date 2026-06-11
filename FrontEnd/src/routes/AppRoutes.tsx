@@ -13,6 +13,7 @@ import FloorDetailsPage from "../pages/FloorDetailsPage";
 import RoomDetailsPage from "../pages/RoomDetailsPage";
 import MeterPage from "../pages/MeterPage";
 import RoomPage from "../pages/RoomPage";
+import GenerateBillPage from "../pages/GenerateBillPage";
 
 function AppRoutes() {
   return (
@@ -45,6 +46,7 @@ function AppRoutes() {
           path="/houses/:houseId/floors/:floorId/rooms/:roomId"
           element={<RoomDetailsPage />}
         />
+        <Route path="/bills/generate" element={<GenerateBillPage />} />
       </Route>
     </Routes>
   );
