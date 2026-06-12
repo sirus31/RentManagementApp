@@ -1139,6 +1139,14 @@ namespace RentManagementApp.Services
                                     detail.UnitsConsumed,
 
 
+                                TenantUnits =
+                                    detail.TenantUnits,
+
+
+                                SharedTenantCount =
+                                    detail.SharedTenantCount,
+
+
                                 Rate =
                                     detail.Rate,
 
@@ -1484,6 +1492,19 @@ namespace RentManagementApp.Services
                     decimal extraChargeAmount =
                         0;
 
+                    decimal previousDueAmount =
+                        await _context.Bills
+
+                            .Where(b =>
+                                b.TenantId == tenant.Id
+                                &&
+                                b.PaymentStatus != PaymentStatus.Paid)
+
+                            .SumAsync(b =>
+                                b.TotalAmount
+                                -
+                                b.AmountPaid);
+
                     var billDetails =
                         new List<BillDetail>();
 
@@ -1702,7 +1723,9 @@ namespace RentManagementApp.Services
                         +
                         garbageAmount
                         +
-                        extraChargeAmount;
+                        extraChargeAmount
+                        +
+                        previousDueAmount;
 
                     var bill =
                         new Bill
@@ -1729,7 +1752,7 @@ namespace RentManagementApp.Services
                                 extraChargeAmount,
 
                             PreviousDueAmount =
-                                0,
+                                previousDueAmount,
 
                             TotalAmount =
                                 total,

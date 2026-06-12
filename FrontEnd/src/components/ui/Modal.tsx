@@ -21,18 +21,18 @@ function Modal({ title, children, onClose }: ModalProps) {
     >
       <div
         className="
-        bg-white
+    bg-white
 
-        rounded-lg
+    rounded-lg
 
-        p-6
+    p-6
 
-        w-150
-        max-h-[80vh]
-        overflow-y-auto
+    w-225
+    max-h-[80vh]
+    overflow-y-auto
 
-        shadow-lg
-        "
+    shadow-lg
+  "
       >
         <div
           className="

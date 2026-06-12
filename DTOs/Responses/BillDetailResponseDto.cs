@@ -1,5 +1,6 @@
 using RentManagementApp.Models.Enums;
 
+
 namespace RentManagementApp.DTOs.Responses
 {
     public class BillDetailResponseDto
@@ -18,6 +19,12 @@ namespace RentManagementApp.DTOs.Responses
 
 
         public decimal UnitsConsumed { get; set; }
+
+
+        public decimal TenantUnits { get; set; }
+
+
+        public int SharedTenantCount { get; set; }
 
 
         public decimal Rate { get; set; }

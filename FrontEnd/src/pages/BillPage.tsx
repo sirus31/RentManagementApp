@@ -246,6 +246,9 @@ function BillPage() {
                 "Rooms",
                 "Rent",
                 "Electricity",
+                "Garbage",
+                "Extra",
+                "Previous Due",
                 "Total",
                 "Paid",
                 "Due",
@@ -259,15 +262,21 @@ function BillPage() {
 
                   <td className="p-4">{bill.rooms.join(", ")}</td>
 
-                  <td className="p-4">{bill.rentAmount}</td>
+                  <td className="p-4">Rs {bill.rentAmount}</td>
 
-                  <td className="p-4">{bill.electricityAmount}</td>
+                  <td className="p-4">Rs {bill.electricityAmount}</td>
 
-                  <td className="p-4">{bill.totalAmount}</td>
+                  <td className="p-4">Rs {bill.garbageAmount}</td>
 
-                  <td className="p-4">{bill.amountPaid}</td>
+                  <td className="p-4">Rs {bill.extraChargeAmount}</td>
 
-                  <td className="p-4">{bill.pendingAmount}</td>
+                  <td className="p-4">Rs {bill.previousDueAmount}</td>
+
+                  <td className="p-4 font-semibold">Rs {bill.totalAmount}</td>
+
+                  <td className="p-4">Rs {bill.amountPaid}</td>
+
+                  <td className="p-4">Rs {bill.pendingAmount}</td>
 
                   <td className="p-4">{bill.paymentStatus}</td>
 
@@ -275,10 +284,10 @@ function BillPage() {
                     <button
                       onClick={() => openBillDetails(bill.billId)}
                       className="
-    text-blue-600
-    hover:underline
-    cursor-pointer
-  "
+            text-blue-600
+            hover:underline
+            cursor-pointer
+          "
                     >
                       View Details
                     </button>

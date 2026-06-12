@@ -44,4 +44,8 @@ export interface BillDetail {
   rate: number;
 
   amount: number;
+
+  tenantUnits: number;
+
+  sharedTenantCount: number;
 }
