@@ -1029,6 +1029,9 @@ namespace RentManagementApp.Services
                 .Include(bill =>
                     bill.BillDetails)
 
+                .Include(bill =>
+                    bill.Payments)
+
 
                 .FirstOrDefaultAsync(
                     bill =>
@@ -1112,7 +1115,6 @@ namespace RentManagementApp.Services
                     bill.AmountPaid,
 
 
-
                 Details =
                     bill.BillDetails
 
@@ -1153,6 +1155,46 @@ namespace RentManagementApp.Services
 
                                 Amount =
                                     detail.Amount
+                            })
+
+                        .ToList(),
+
+
+                Payments =
+                    bill.Payments
+
+                        .OrderByDescending(payment =>
+                            payment.PaymentDate)
+
+                        .Select(payment =>
+                            new PaymentResponseDto
+                            {
+                                Id =
+                                    payment.Id,
+
+
+                                BillId =
+                                    payment.BillId,
+
+
+                                BillNumber =
+                                    bill.BillNumber,
+
+
+                                Amount =
+                                    payment.Amount,
+
+
+                                PaymentDate =
+                                    payment.PaymentDate,
+
+
+                                PaymentMode =
+                                    payment.PaymentMode,
+
+
+                                Notes =
+                                    payment.Notes
                             })
 
                         .ToList()
@@ -1292,7 +1334,7 @@ namespace RentManagementApp.Services
 
                     .ToList();
 
-            var previousDues =
+            var allBills =
             await _context.Bills
 
                 .Include(bill =>
@@ -1302,37 +1344,60 @@ namespace RentManagementApp.Services
                     bill.BillCycle)
 
                 .Where(bill =>
-                    bill.BillCycle.HouseId == houseId
-                    &&
-                    bill.TotalAmount - bill.AmountPaid > 0)
+                    bill.BillCycle.HouseId == houseId)
 
-                .Select(bill =>
-                    new GenerateBillPreviousDueDto
-                    {
-                        TenantId =
-                            bill.TenantId,
+                .ToListAsync();
 
 
-                        TenantName =
-                            bill.Tenant.FullName,
+
+            var previousDues =
+                allBills
+
+                    .OrderByDescending(bill =>
+                        bill.BillCycle.BillingYear)
+
+                    .ThenByDescending(bill =>
+                        bill.BillCycle.BillingMonth)
+
+                    .GroupBy(bill =>
+                        bill.TenantId)
+
+                    .Select(group =>
+                        group.First())
+
+                    .Where(bill =>
+                        bill.TotalAmount
+                        -
+                        bill.AmountPaid
+                        >
+                        0)
+
+                    .Select(bill =>
+                        new GenerateBillPreviousDueDto
+                        {
+                            TenantId =
+                                bill.TenantId,
 
 
-                        BillingMonth =
-                            bill.BillCycle.BillingMonth.ToString(),
+                            TenantName =
+                                bill.Tenant.FullName,
 
 
-                        BillingYear =
-                            bill.BillCycle.BillingYear,
+                            BillingMonth =
+                                bill.BillCycle.BillingMonth.ToString(),
 
 
-                        DueAmount =
-                            bill.TotalAmount
-                            -
-                            bill.AmountPaid
-                    })
+                            BillingYear =
+                                bill.BillCycle.BillingYear,
 
-        .ToListAsync();
 
+                            DueAmount =
+                                bill.TotalAmount
+                                -
+                                bill.AmountPaid
+                        })
+
+                    .ToList();
 
             return new GenerateBillInfoResponseDto
             {
@@ -1492,18 +1557,29 @@ namespace RentManagementApp.Services
                     decimal extraChargeAmount =
                         0;
 
-                    decimal previousDueAmount =
+                    var latestBill =
                         await _context.Bills
 
-                            .Where(b =>
-                                b.TenantId == tenant.Id
-                                &&
-                                b.PaymentStatus != PaymentStatus.Paid)
+                            .Include(b =>
+                                b.BillCycle)
 
-                            .SumAsync(b =>
-                                b.TotalAmount
-                                -
-                                b.AmountPaid);
+                            .Where(b =>
+                                b.TenantId == tenant.Id)
+
+                            .OrderByDescending(b =>
+                                b.BillCycle.BillingYear)
+
+                            .ThenByDescending(b =>
+                                b.BillCycle.BillingMonth)
+
+                            .FirstOrDefaultAsync();
+
+                    decimal previousDueAmount =
+                        latestBill == null
+                            ? 0
+                            : latestBill.TotalAmount
+                              -
+                              latestBill.AmountPaid;
 
                     var billDetails =
                         new List<BillDetail>();

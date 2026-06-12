@@ -27,6 +27,8 @@ export interface BillFullDetail {
 
   details: BillDetail[];
 
+  payments: Payment[];
+
   rooms: string[];
 }
 
@@ -48,4 +50,20 @@ export interface BillDetail {
   tenantUnits: number;
 
   sharedTenantCount: number;
+}
+
+export interface Payment {
+  id: number;
+
+  billId: number;
+
+  billNumber: string;
+
+  amount: number;
+
+  paymentDate: string;
+
+  paymentMode: string;
+
+  notes: string;
 }

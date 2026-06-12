@@ -59,15 +59,6 @@ namespace RentManagementApp.Services
 
 
 
-            if (bill.BillCycle.Status !=
-                BillStatus.Finalized)
-            {
-                throw new Exception(
-                    "Bill must be finalized before payment");
-            }
-
-
-
             if (bill.AmountPaid + request.Amount >
                 bill.TotalAmount)
             {

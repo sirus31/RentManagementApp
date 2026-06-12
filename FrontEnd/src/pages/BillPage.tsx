@@ -303,6 +303,11 @@ function BillPage() {
         <BillDetails
           bill={selectedBill}
           onClose={() => setSelectedBill(null)}
+          onRefresh={async () => {
+            await openBillDetails(selectedBill.billId);
+
+            await loadBills(selectedHouseId);
+          }}
         />
       )}
     </div>

@@ -47,6 +47,9 @@ namespace RentManagementApp.DTOs.Responses
         public List<BillDetailResponseDto> Details { get; set; }
             = new();
 
+        public List<PaymentResponseDto> Payments { get; set; }
+            = new();
+
         public List<string> Rooms { get; set; }
             = new();
     }
