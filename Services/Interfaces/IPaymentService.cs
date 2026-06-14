@@ -17,5 +17,15 @@ namespace RentManagementApp.Services.Interfaces
 
         Task<List<PaymentResponseDto>>
             GetAllPaymentsAsync();
+
+        Task<PaymentDashboardResponseDto>
+            GetPaymentDashboardAsync(
+                int? houseId,
+                int? tenantId,
+                int? month,
+                int? year
+            );
+
+        Task<PaymentFilterResponseDto> GetPaymentFiltersAsync();
     }
 }

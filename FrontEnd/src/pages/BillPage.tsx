@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 import Select from "../components/ui/Select";
 
 import DataTable from "../components/ui/DataTable";
-
-import Button from "../components/ui/Button";
 
 import GenerateBillForm from "../components/forms/GenerateBillForm";
 
@@ -36,8 +34,6 @@ function BillPage() {
   const [yearFilter, setYearFilter] = useState("all");
 
   const [selectedBill, setSelectedBill] = useState<BillFullDetail | null>(null);
-
-  const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
 

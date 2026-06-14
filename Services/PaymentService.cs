@@ -279,5 +279,469 @@ namespace RentManagementApp.Services
 
             return payments;
         }
+
+        public async Task<PaymentDashboardResponseDto>
+    GetPaymentDashboardAsync(
+        int? houseId,
+        int? tenantId,
+        int? month,
+        int? year)
+        {
+
+
+            var billQuery =
+                _context.Bills
+
+
+                    .Include(bill =>
+                        bill.Tenant)
+
+
+                    .Include(bill =>
+                        bill.BillCycle)
+
+
+                    .AsQueryable();
+
+
+
+
+
+            if (houseId.HasValue)
+            {
+                billQuery =
+                    billQuery.Where(bill =>
+                        bill.BillCycle.HouseId
+                        ==
+                        houseId.Value);
+            }
+
+
+
+
+            if (tenantId.HasValue)
+            {
+                billQuery =
+                    billQuery.Where(bill =>
+                        bill.TenantId
+                        ==
+                        tenantId.Value);
+            }
+
+
+
+
+            if (month.HasValue)
+            {
+                billQuery =
+                    billQuery.Where(bill =>
+                        (int)bill.BillCycle.BillingMonth
+                        ==
+                        month.Value);
+            }
+
+
+
+
+            if (year.HasValue)
+            {
+                billQuery =
+                    billQuery.Where(bill =>
+                        bill.BillCycle.BillingYear
+                        ==
+                        year.Value);
+            }
+
+
+
+
+
+
+
+
+            var latestBills =
+     await billQuery
+
+
+         .GroupBy(bill =>
+             bill.TenantId)
+
+
+         .Select(group =>
+             group
+
+                 .OrderByDescending(bill =>
+                     bill.BillCycle.BillingYear)
+
+
+                 .ThenByDescending(bill =>
+                     bill.BillCycle.BillingMonth)
+
+
+                 .First())
+
+
+         .ToListAsync();
+
+
+
+
+
+
+            var pendingBills =
+                latestBills
+
+
+                    .Where(bill =>
+                        bill.TotalAmount
+                        -
+                        bill.AmountPaid
+                        >
+                        0)
+
+
+                    .Select(bill =>
+                        new PendingPaymentDto
+                        {
+                            BillId =
+                                bill.Id,
+
+
+                            TenantName =
+                                bill.Tenant.FullName,
+
+
+                            BillingMonth =
+                                bill.BillCycle
+                                    .BillingMonth
+                                    .ToString(),
+
+
+                            BillingYear =
+                                bill.BillCycle
+                                    .BillingYear,
+
+
+                            TotalAmount =
+                                bill.TotalAmount,
+
+
+                            AmountPaid =
+                                bill.AmountPaid,
+
+
+                            PendingAmount =
+                                bill.TotalAmount
+                                -
+                                bill.AmountPaid
+                        })
+
+
+                    .ToList();
+
+
+
+
+
+
+
+            var paymentQuery =
+                _context.Payments
+
+
+                    .Include(payment =>
+                        payment.Bill)
+
+                        .ThenInclude(bill =>
+                            bill.Tenant)
+
+
+                    .Include(payment =>
+                        payment.Bill)
+
+                        .ThenInclude(bill =>
+                            bill.BillCycle)
+
+
+                    .AsQueryable();
+
+
+
+
+
+
+
+            if (houseId.HasValue)
+            {
+                paymentQuery =
+                    paymentQuery.Where(payment =>
+                        payment.Bill.BillCycle.HouseId
+                        ==
+                        houseId.Value);
+            }
+
+
+
+
+            if (tenantId.HasValue)
+            {
+                paymentQuery =
+                    paymentQuery.Where(payment =>
+                        payment.Bill.TenantId
+                        ==
+                        tenantId.Value);
+            }
+
+
+
+
+            if (month.HasValue)
+            {
+                paymentQuery =
+                    paymentQuery.Where(payment =>
+                        (int)payment.Bill.BillCycle.BillingMonth
+                        ==
+                        month.Value);
+            }
+
+
+
+
+            if (year.HasValue)
+            {
+                paymentQuery =
+                    paymentQuery.Where(payment =>
+                        payment.Bill.BillCycle.BillingYear
+                        ==
+                        year.Value);
+            }
+
+
+
+
+
+
+
+
+
+            var recentPayments =
+                await paymentQuery
+
+
+                    .OrderByDescending(payment =>
+                        payment.PaymentDate)
+
+
+                    .Select(payment =>
+                        new RecentPaymentDto
+                        {
+                            PaymentId =
+                                payment.Id,
+
+
+                            TenantName =
+                                payment.Bill
+                                    .Tenant
+                                    .FullName,
+
+
+                            BillingMonth =
+                                payment.Bill
+                                    .BillCycle
+                                    .BillingMonth
+                                    .ToString(),
+
+
+                            BillingYear =
+                                payment.Bill
+                                    .BillCycle
+                                    .BillingYear,
+
+
+                            Amount =
+                                payment.Amount,
+
+
+                            PaymentDate =
+                                payment.PaymentDate,
+
+
+                            PaymentMode =
+                                payment.PaymentMode
+                        })
+
+
+                    .ToListAsync();
+
+
+
+
+
+
+
+
+            return new PaymentDashboardResponseDto
+            {
+                TotalCollected =
+                    recentPayments.Sum(payment =>
+                        payment.Amount),
+
+
+                TotalPending =
+                    pendingBills.Sum(bill =>
+                        bill.PendingAmount),
+
+
+                TotalTransactions =
+                    recentPayments.Count,
+
+
+                PendingPayments =
+                    pendingBills,
+
+
+                RecentPayments =
+                    recentPayments
+            };
+        }
+
+        public async Task<PaymentFilterResponseDto> GetPaymentFiltersAsync()
+        {
+
+            var houses =
+                await _context.Houses
+
+
+                    .Select(house =>
+                        new PaymentFilterHouseDto
+                        {
+                            Id =
+                                house.Id,
+
+
+                            Name =
+                                house.Name
+                        })
+
+
+                    .ToListAsync();
+
+
+
+
+
+            var tenants =
+                await _context.Tenants
+
+
+                    .Include(tenant =>
+                        tenant.TenantRooms)
+
+
+                        .ThenInclude(tenantRoom =>
+                            tenantRoom.Room)
+
+
+                            .ThenInclude(room =>
+                                room.Floor)
+
+
+                    .Select(tenant =>
+                        new PaymentFilterTenantDto
+                        {
+                            Id =
+                                tenant.Id,
+
+
+                            Name =
+                                tenant.FullName,
+
+
+                            HouseIds =
+                                tenant.TenantRooms
+
+                                    .Select(tenantRoom =>
+                                        tenantRoom.Room
+                                            .Floor
+                                            .HouseId)
+
+                                    .Distinct()
+
+                                    .ToList()
+                        })
+
+
+                    .ToListAsync();
+
+            var months =
+                await _context.BillCycles
+
+
+                    .Select(cycle =>
+                        cycle.BillingMonth)
+
+
+                    .Distinct()
+
+
+                    .OrderBy(month =>
+                        month)
+
+
+                    .Select(month =>
+                        new PaymentFilterMonthDto
+                        {
+                            Value =
+                                (int)month,
+
+
+                            Name =
+                                month.ToString()
+                        })
+
+
+                    .ToListAsync();
+
+
+
+
+
+
+            var years =
+                await _context.BillCycles
+
+
+                    .Select(cycle =>
+                        cycle.BillingYear)
+
+
+                    .Distinct()
+
+
+                    .OrderByDescending(year =>
+                        year)
+
+
+                    .ToListAsync();
+
+
+            return new PaymentFilterResponseDto
+            {
+                Houses =
+            houses,
+
+
+                Tenants =
+            tenants,
+
+
+                Months =
+            months,
+
+
+                Years =
+            years
+            };
+        }
     }
 }

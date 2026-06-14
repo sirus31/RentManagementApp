@@ -68,5 +68,43 @@ namespace RentManagementApp.Controllers
 
             return Ok(payments);
         }
+
+
+        [HttpGet("dashboard")]
+
+        public async Task<IActionResult>
+            GetPaymentDashboard(
+                int? houseId,
+                int? tenantId,
+                int? month,
+                int? year)
+        {
+            var dashboard =
+                await _paymentService
+                    .GetPaymentDashboardAsync(
+                        houseId,
+                        tenantId,
+                        month,
+                        year
+                    );
+
+
+            return Ok(
+                dashboard);
+        }
+
+        [HttpGet("filters")]
+
+        public async Task<IActionResult> GetPaymentFilters()
+        {
+
+            var filters =
+                await _paymentService
+                    .GetPaymentFiltersAsync();
+
+
+
+            return Ok(filters);
+        }
     }
 }
