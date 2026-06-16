@@ -1323,14 +1323,22 @@ namespace RentManagementApp.Services
                                         ==
                                         meter.Id)
 
+
                                     .OrderByDescending(reading =>
                                         reading.ReadingDate)
 
+
                                     .Select(reading =>
-                                        reading.ReadingValue)
+                                        (decimal?)reading.ReadingValue)
+
 
                                     .FirstOrDefault()
+
+                                    ??
+
+                                    meter.InitialReading
                         })
+
 
                     .ToList();
 
@@ -1480,13 +1488,16 @@ namespace RentManagementApp.Services
 
 
                         ReadingDate =
-                            DateTime.UtcNow
+                            DateTime.UtcNow,
+
+
+                        Notes = $"Auto generated bill reading - {request.BillingMonth} {request.BillingYear}"
                     };
+
 
                 await _context.MeterReadings
                     .AddAsync(meterReading);
             }
-
             var billCycle =
                 new BillCycle
                 {
@@ -1692,9 +1703,11 @@ namespace RentManagementApp.Services
 
 
                             tenantUnits =
-                                units
-                                /
-                                sharedTenantCount;
+                                Math.Ceiling(
+                                    units
+                                    /
+                                    sharedTenantCount
+                                );
                         }
 
                         decimal amount =
@@ -1767,12 +1780,16 @@ namespace RentManagementApp.Services
                         {
 
                             decimal splitAmount =
-                                charge.Amount
-                                /
-                                charge.TenantIds.Count;
+                                Math.Ceiling(
+                                    charge.Amount
+                                    /
+                                    charge.TenantIds.Count
+                                );
+
 
                             extraChargeAmount +=
                                 splitAmount;
+
 
                             billDetails.Add(
 
@@ -1781,8 +1798,10 @@ namespace RentManagementApp.Services
                                     DetailType =
                                         BillDetailType.Maintenance,
 
+
                                     Description =
                                         charge.ChargeName,
+
 
                                     Amount =
                                         splitAmount
