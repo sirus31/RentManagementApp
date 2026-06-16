@@ -48,6 +48,8 @@ namespace RentManagementApp.DTOs.Responses
 
 
         public decimal PendingAmount { get; set; }
+
+        public bool CanReceivePayment { get; set; }
     }
 
 

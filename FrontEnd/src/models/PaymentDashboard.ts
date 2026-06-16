@@ -24,6 +24,8 @@ export interface PendingPayment {
   amountPaid: number;
 
   pendingAmount: number;
+
+  canReceivePayment: boolean;
 }
 
 export interface RecentPayment {

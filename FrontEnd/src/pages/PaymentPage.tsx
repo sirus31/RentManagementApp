@@ -219,6 +219,7 @@ function PaymentPage() {
               "Bill Amount",
               "Paid",
               "Due",
+              "Status",
               "Action",
             ]}
           >
@@ -237,9 +238,17 @@ function PaymentPage() {
                 <td className="p-4">Rs {bill.pendingAmount}</td>
 
                 <td className="p-4">
-                  <Button onClick={() => setSelectedBill(bill)}>
-                    Receive Payment
-                  </Button>
+                  {bill.canReceivePayment ? "Pending" : "Carried Forward"}
+                </td>
+
+                <td className="p-4">
+                  {bill.canReceivePayment ? (
+                    <Button onClick={() => setSelectedBill(bill)}>
+                      Receive Payment
+                    </Button>
+                  ) : (
+                    <span className="text-gray-500">View Only</span>
+                  )}
                 </td>
               </tr>
             ))}

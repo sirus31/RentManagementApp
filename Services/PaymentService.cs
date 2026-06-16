@@ -385,6 +385,30 @@ namespace RentManagementApp.Services
 
 
 
+            var latestBillIds =
+       await _context.Bills
+
+           .GroupBy(bill =>
+               bill.TenantId)
+
+           .Select(group =>
+               group
+
+                   .OrderByDescending(bill =>
+                       bill.BillCycle.BillingYear)
+
+                   .ThenByDescending(bill =>
+                       bill.BillCycle.BillingMonth)
+
+                   .Select(bill =>
+                       bill.Id)
+
+                   .First())
+
+           .ToListAsync();
+
+
+
 
 
 
@@ -433,7 +457,14 @@ namespace RentManagementApp.Services
                             PendingAmount =
                                 bill.TotalAmount
                                 -
-                                bill.AmountPaid
+                                bill.AmountPaid,
+
+                            CanReceivePayment =
+                                latestBillIds.Contains(
+                                    bill.Id
+                                )
+
+
                         })
 
 
