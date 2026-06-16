@@ -1,12 +1,20 @@
 import { useState } from "react";
 
-import type { CreateFloor } from "../../models/CreateFloor";
+// import type { CreateFloor } from "../../models/CreateFloor";
 
 import { createFloor } from "../../services/floorService";
 
 import Input from "../ui/Input";
 
 import Button from "../ui/Button";
+
+type FloorFormState = {
+  houseId: number;
+
+  floorNumber: string;
+
+  name: string;
+};
 
 type FloorFormProps = {
   houseId: number;
@@ -19,10 +27,10 @@ function FloorForm({
 
   onFloorCreated,
 }: FloorFormProps) {
-  const [floor, setFloor] = useState<CreateFloor>({
+  const [floor, setFloor] = useState<FloorFormState>({
     houseId: houseId,
 
-    floorNumber: 0,
+    floorNumber: "",
 
     name: "",
   });
@@ -39,14 +47,18 @@ function FloorForm({
     }
 
     try {
-      await createFloor(floor);
+      await createFloor({
+        ...floor,
+
+        floorNumber: Number(floor.floorNumber),
+      });
 
       onFloorCreated();
 
       setFloor({
         houseId: houseId,
 
-        floorNumber: 0,
+        floorNumber: "",
 
         name: "",
       });
@@ -82,7 +94,7 @@ function FloorForm({
         <Input
           placeholder="Floor Number"
           type="number"
-          value={String(floor.floorNumber || "")}
+          value={floor.floorNumber}
           onKeyDown={(e) => {
             if (e.key === "e" || e.key === "+" || e.key === "-") {
               e.preventDefault();
@@ -92,7 +104,7 @@ function FloorForm({
             setFloor({
               ...floor,
 
-              floorNumber: Number(value),
+              floorNumber: value,
             })
           }
         />
