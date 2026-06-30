@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
             policy
                 .WithOrigins(
                     "https://rent-management-app-front-end-with.vercel.app",
-                    "https://ghar-sewa-fawn.vercel.app/",
+                    "https://ghar-sewa-fawn.vercel.app",
                     "http://localhost:5173"
                 )
                 .AllowAnyHeader()
