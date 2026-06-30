@@ -4,3 +4,41 @@ GET {{RentManagementApp_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# @name Register Landlord
+POST {{RentManagementApp_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "FullName": "John Doe",
+  "Email": "john.doe@example.com",
+  "PhoneNumber": "+1234567890",
+  "Password": "SecurePassword123"
+}
+
+###
+
+# @name Register Landlord Duplicate (Validation Test)
+POST {{RentManagementApp_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "FullName": "Jane Doe",
+  "Email": "john.doe@example.com",
+  "PhoneNumber": "+1234567890",
+  "Password": "SecurePassword123"
+}
+
+###
+
+# @name Login Landlord
+POST {{RentManagementApp_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "Email": "john.doe@example.com",
+  "Password": "SecurePassword123"
+}
+
+###
+

@@ -1,5 +1,8 @@
 using System.Text.Json.Serialization;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RentManagementApp.Data;
 using RentManagementApp.Services;
 using RentManagementApp.Services.Interfaces;
@@ -25,6 +28,31 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var keyBytes = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "A_Very_Long_And_Secure_Secret_Key_For_Jwt_Signing_12345!");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -38,6 +66,10 @@ builder.Services
             .Add(
                 new JsonStringEnumConverter());
     });
+
+builder.Services.AddScoped<
+    IAuthService,
+    AuthService>();
 
 builder.Services.AddScoped<
     ITenantService,
@@ -82,6 +114,9 @@ builder.Services.AddScoped<
 var app = builder.Build();
 
 app.UseCors("AllowReactApp");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

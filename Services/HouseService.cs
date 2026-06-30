@@ -66,9 +66,15 @@ namespace RentManagementApp.Services
             };
         }
 
-        public async Task<List<HouseResponseDto>> GetAllHousesAsync()
+        public async Task<List<HouseResponseDto>> GetAllHousesAsync(int? userId = null)
         {
-            return await _context.Houses
+            var query = _context.Houses.AsQueryable();
+            if (userId.HasValue)
+            {
+                query = query.Where(h => h.UserId == userId.Value);
+            }
+
+            return await query
                 .Select(h => new HouseResponseDto
                 {
                     Id = h.Id,

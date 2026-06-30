@@ -177,6 +177,14 @@ namespace RentManagementApp.Data
                 .HasIndex(b => b.BillNumber)
                 .IsUnique();
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.PhoneNumber)
+                .IsUnique();
+
         }
     }
 }

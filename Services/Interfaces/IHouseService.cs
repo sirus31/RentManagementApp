@@ -10,6 +10,6 @@ namespace RentManagementApp.Services.Interfaces
                 CreateHouseRequestDto request);
 
         Task<List<HouseResponseDto>>
-            GetAllHousesAsync();
+            GetAllHousesAsync(int? userId = null);
     }
 }
