@@ -30,7 +30,14 @@ builder.Services.AddSwaggerGen();
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var keyBytes = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "A_Very_Long_And_Secure_Secret_Key_For_Jwt_Signing_12345!");
+var jwtKey = jwtSettings["Key"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new Exception("JWT Key is not configured.");
+}
+
+var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
 {
