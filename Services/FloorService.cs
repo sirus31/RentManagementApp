@@ -23,14 +23,14 @@ namespace RentManagementApp.Services
 
         public async Task<FloorResponseDto>
             CreateFloorAsync(
-                CreateFloorRequestDto request)
+                CreateFloorRequestDto request, int userId)
         {
-            var houseExists =
+            var house =
                 await _context.Houses
-                    .AnyAsync(h =>
+                    .FirstOrDefaultAsync(h =>
                         h.Id == request.HouseId);
 
-            if (!houseExists)
+            if (house == null || house.UserId != userId)
             {
                 throw new Exception(
                     "House not found");
@@ -65,9 +65,11 @@ namespace RentManagementApp.Services
         }
 
         public async Task<List<FloorResponseDto>>
-            GetAllFloorsAsync()
+            GetAllFloorsAsync(int userId)
         {
             return await _context.Floors
+                .Where(f =>
+                    f.House.UserId == userId)
                 .Select(f => new FloorResponseDto
                 {
                     Id = f.Id,
@@ -84,11 +86,12 @@ namespace RentManagementApp.Services
 
         public async Task<List<FloorResponseDto>>
             GetFloorsByHouseAsync(
-                int houseId)
+                int houseId, int userId)
         {
             return await _context.Floors
                 .Where(f =>
-                    f.HouseId == houseId)
+                    f.HouseId == houseId
+                    && f.House.UserId == userId)
 
                 .Select(f => new FloorResponseDto
                 {

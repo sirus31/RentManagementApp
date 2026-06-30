@@ -7,16 +7,16 @@ namespace RentManagementApp.Services.Interfaces
     {
         Task<OccupancyResponseDto>
             AssignRoomAsync(
-                AssignRoomRequestDto request);
+                AssignRoomRequestDto request, int userId);
 
         Task VacateRoomAsync(
-            VacateRoomRequestDto request);
+            VacateRoomRequestDto request, int userId);
 
         Task<List<OccupancyResponseDto>>
-            GetActiveOccupanciesAsync();
+            GetActiveOccupanciesAsync(int userId);
 
         Task<OccupancyResponseDto> MoveInTenantAsync(
-        MoveInTenantRequestDto request
+        MoveInTenantRequestDto request, int userId
     );
     }
 }

@@ -25,14 +25,14 @@ namespace RentManagementApp.Services
 
         public async Task<MeterResponseDto>
             CreateMeterAsync(
-                CreateMeterRequestDto request)
+                CreateMeterRequestDto request, int userId)
         {
-            var houseExists =
+            var house =
                 await _context.Houses
-                    .AnyAsync(h =>
+                    .FirstOrDefaultAsync(h =>
                         h.Id == request.HouseId);
 
-            if (!houseExists)
+            if (house == null || house.UserId != userId)
             {
                 throw new Exception(
                     "House not found");
@@ -99,9 +99,11 @@ namespace RentManagementApp.Services
         }
 
         public async Task<List<MeterResponseDto>>
-            GetAllMetersAsync()
+            GetAllMetersAsync(int userId)
         {
             var meters = await _context.Meters
+                .Where(m =>
+                    m.House.UserId == userId)
                 .Select(m =>
                     new MeterResponseDto
                     {
@@ -128,11 +130,12 @@ namespace RentManagementApp.Services
         }
 
         public async Task<List<MeterResponseDto>>
-            GetActiveMetersAsync()
+            GetActiveMetersAsync(int userId)
         {
             var meters = await _context.Meters
                 .Where(m =>
-                    m.IsActive)
+                    m.IsActive
+                    && m.House.UserId == userId)
                 .Select(m =>
                     new MeterResponseDto
                     {
@@ -160,11 +163,12 @@ namespace RentManagementApp.Services
 
         public async Task<MeterResponseDto>
             GetMeterByIdAsync(
-                int meterId)
+                int meterId, int userId)
         {
             var meter = await _context.Meters
                 .FirstOrDefaultAsync(m =>
-                    m.Id == meterId);
+                    m.Id == meterId
+                    && m.House.UserId == userId);
 
             if (meter == null)
             {
@@ -194,7 +198,7 @@ namespace RentManagementApp.Services
         }
 
         public async Task<List<MeterResponseDto>> GetMetersByHouseAsync(
-            int houseId
+            int houseId, int userId
         )
         {
 
@@ -202,6 +206,7 @@ namespace RentManagementApp.Services
                 await _context.Meters
                 .Where(m =>
                     m.HouseId == houseId
+                    && m.House.UserId == userId
                 )
                 .Select(m =>
                     new MeterResponseDto
@@ -228,11 +233,12 @@ namespace RentManagementApp.Services
         public async Task<MeterResponseDto>
             UpdateMeterAsync(
                 int meterId,
-                UpdateMeterRequestDto request)
+                UpdateMeterRequestDto request, int userId)
         {
             var meter = await _context.Meters
                 .FirstOrDefaultAsync(m =>
-                    m.Id == meterId);
+                    m.Id == meterId
+                    && m.House.UserId == userId);
 
             if (meter == null)
             {
@@ -291,11 +297,12 @@ namespace RentManagementApp.Services
 
         public async Task<MeterResponseDto>
             DeactivateMeterAsync(
-                int meterId)
+                int meterId, int userId)
         {
             var meter = await _context.Meters
                 .FirstOrDefaultAsync(m =>
-                    m.Id == meterId);
+                    m.Id == meterId
+                    && m.House.UserId == userId);
 
             if (meter == null)
             {
@@ -328,13 +335,14 @@ namespace RentManagementApp.Services
             };
         }
 
-        public async Task<List<MeterOverviewResponseDto>> GetMeterOverviewByHouseAsync(int houseId)
+        public async Task<List<MeterOverviewResponseDto>> GetMeterOverviewByHouseAsync(int houseId, int userId)
         {
             return await _context.Meters
 
 
                 .Where(m =>
                     m.HouseId == houseId
+                    && m.House.UserId == userId
                 )
 
 
@@ -369,12 +377,10 @@ namespace RentManagementApp.Services
                             m.TenantMeters
 
                                 .Where(tm =>
-                                    tm.EndDate == null
-                                )
+                                    tm.EndDate == null)
 
                                 .Select(tm =>
-                                    tm.Tenant.FullName
-                                )
+                                    tm.Tenant.FullName)
 
                                 .ToList()
                     })

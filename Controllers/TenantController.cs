@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TenantController : ControllerBase
@@ -16,12 +19,17 @@ namespace RentManagementApp.Controllers
             _tenantService = tenantService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateTenant(
             CreateTenantRequestDto request)
         {
             var response = await _tenantService
-                .CreateTenantAsync(request);
+                .CreateTenantAsync(request, GetUserId());
 
             return Ok(response);
         }
@@ -31,7 +39,7 @@ namespace RentManagementApp.Controllers
         public async Task<IActionResult> GetAllTenants()
         {
             var tenants = await _tenantService
-                .GetAllTenantsAsync();
+                .GetAllTenantsAsync(GetUserId());
 
             return Ok(tenants);
         }
@@ -42,7 +50,7 @@ namespace RentManagementApp.Controllers
         {
             var tenants =
                 await _tenantService
-                    .GetTenantsWithActiveRoomsAsync();
+                    .GetTenantsWithActiveRoomsAsync(GetUserId());
 
             return Ok(tenants);
         }
@@ -53,7 +61,7 @@ namespace RentManagementApp.Controllers
         {
             var tenants =
                 await _tenantService
-                    .GetTenantOccupancyHistoryAsync();
+                    .GetTenantOccupancyHistoryAsync(GetUserId());
 
             return Ok(tenants);
         }
@@ -61,7 +69,7 @@ namespace RentManagementApp.Controllers
         [HttpPost("assign-room")]
         public async Task<IActionResult> AssignRoom(AssignRoomRequestDto request)
         {
-            await _tenantService.AssignRoomAsync(request);
+            await _tenantService.AssignRoomAsync(request, GetUserId());
 
             return Ok("Room assigned successfully");
         }
@@ -72,7 +80,7 @@ namespace RentManagementApp.Controllers
             var result =
                 await _tenantService
                     .VacateTenantAsync(
-                        tenantId);
+                        tenantId, GetUserId());
 
             return Ok(result);
         }
@@ -81,7 +89,7 @@ namespace RentManagementApp.Controllers
 
         public async Task<IActionResult> GetTenantById(int id)
         {
-            var tenant = await _tenantService.GetTenantByIdAsync(id);
+            var tenant = await _tenantService.GetTenantByIdAsync(id, GetUserId());
 
 
             if (tenant == null)
@@ -100,7 +108,7 @@ namespace RentManagementApp.Controllers
             var tenants =
                 await _tenantService
                 .GetTenantOverviewAsync(
-                    houseId
+                    houseId, GetUserId()
                 );
 
 

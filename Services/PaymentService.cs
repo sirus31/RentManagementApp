@@ -29,7 +29,7 @@ namespace RentManagementApp.Services
 
         public async Task<PaymentResponseDto>
             CreatePaymentAsync(
-                CreatePaymentRequestDto request)
+                CreatePaymentRequestDto request, int userId)
         {
 
             var bill = await _context.Bills
@@ -43,6 +43,12 @@ namespace RentManagementApp.Services
 
 
             if (bill == null)
+            {
+                throw new Exception(
+                    "Bill not found");
+            }
+
+            if (bill.BillCycle.House.UserId != userId)
             {
                 throw new Exception(
                     "Bill not found");
@@ -166,8 +172,18 @@ namespace RentManagementApp.Services
 
         public async Task<List<PaymentResponseDto>>
             GetBillPaymentsAsync(
-                int billId)
+                int billId, int userId)
         {
+
+            var billExists = await _context.Bills
+                .AnyAsync(b =>
+                    b.Id == billId
+                    && b.BillCycle.House.UserId == userId);
+
+            if (!billExists)
+            {
+                throw new Exception("Bill not found");
+            }
 
             var payments =
                 await _context.Payments
@@ -226,7 +242,7 @@ namespace RentManagementApp.Services
 
 
         public async Task<List<PaymentResponseDto>>
-            GetAllPaymentsAsync()
+            GetAllPaymentsAsync(int userId)
         {
 
             var payments =
@@ -235,7 +251,11 @@ namespace RentManagementApp.Services
 
                     .Include(p =>
                         p.Bill)
+                        .ThenInclude(b => b.BillCycle)
 
+
+                    .Where(p =>
+                        p.Bill.BillCycle.House.UserId == userId)
 
                     .OrderByDescending(p =>
                         p.PaymentDate)
@@ -282,6 +302,7 @@ namespace RentManagementApp.Services
 
         public async Task<PaymentDashboardResponseDto>
     GetPaymentDashboardAsync(
+        int userId,
         int? houseId,
         int? tenantId,
         int? month,
@@ -289,20 +310,20 @@ namespace RentManagementApp.Services
         {
 
 
+
             var billQuery =
                 _context.Bills
-
 
                     .Include(bill =>
                         bill.Tenant)
 
-
                     .Include(bill =>
                         bill.BillCycle)
 
+                    .Where(bill =>
+                        bill.BillCycle.House.UserId == userId)
 
                     .AsQueryable();
-
 
 
 
@@ -351,7 +372,6 @@ namespace RentManagementApp.Services
                         ==
                         year.Value);
             }
-
 
 
 
@@ -468,6 +488,7 @@ namespace RentManagementApp.Services
                         })
 
 
+
                     .ToList();
 
 
@@ -478,7 +499,6 @@ namespace RentManagementApp.Services
 
             var paymentQuery =
                 _context.Payments
-
 
                     .Include(payment =>
                         payment.Bill)
@@ -493,9 +513,10 @@ namespace RentManagementApp.Services
                         .ThenInclude(bill =>
                             bill.BillCycle)
 
+                    .Where(payment =>
+                        payment.Bill.BillCycle.House.UserId == userId)
 
                     .AsQueryable();
-
 
 
 
@@ -546,8 +567,6 @@ namespace RentManagementApp.Services
                         ==
                         year.Value);
             }
-
-
 
 
 
@@ -636,12 +655,13 @@ namespace RentManagementApp.Services
             };
         }
 
-        public async Task<PaymentFilterResponseDto> GetPaymentFiltersAsync()
+        public async Task<PaymentFilterResponseDto> GetPaymentFiltersAsync(int userId)
         {
 
             var houses =
                 await _context.Houses
 
+                    .Where(h => h.UserId == userId)
 
                     .Select(house =>
                         new PaymentFilterHouseDto
@@ -668,14 +688,15 @@ namespace RentManagementApp.Services
                     .Include(tenant =>
                         tenant.TenantRooms)
 
-
                         .ThenInclude(tenantRoom =>
                             tenantRoom.Room)
-
 
                             .ThenInclude(room =>
                                 room.Floor)
 
+                    .Where(tenant =>
+                        tenant.TenantRooms.Any(tr =>
+                            tr.Room.Floor.House.UserId == userId))
 
                     .Select(tenant =>
                         new PaymentFilterTenantDto
@@ -706,6 +727,8 @@ namespace RentManagementApp.Services
 
             var months =
                 await _context.BillCycles
+
+                    .Where(bc => bc.House.UserId == userId)
 
 
                     .Select(cycle =>
@@ -740,6 +763,8 @@ namespace RentManagementApp.Services
 
             var years =
                 await _context.BillCycles
+
+                    .Where(bc => bc.House.UserId == userId)
 
 
                     .Select(cycle =>

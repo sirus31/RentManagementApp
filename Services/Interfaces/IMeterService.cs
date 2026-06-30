@@ -7,28 +7,28 @@ namespace RentManagementApp.Services.Interfaces
     {
         Task<MeterResponseDto>
             CreateMeterAsync(
-                CreateMeterRequestDto request);
+                CreateMeterRequestDto request, int userId);
 
         Task<List<MeterResponseDto>>
-            GetAllMetersAsync();
+            GetAllMetersAsync(int userId);
 
         Task<List<MeterResponseDto>>
-            GetActiveMetersAsync();
+            GetActiveMetersAsync(int userId);
 
         Task<MeterResponseDto>
             GetMeterByIdAsync(
-                int meterId);
+                int meterId, int userId);
 
         Task<MeterResponseDto>
             UpdateMeterAsync(
                 int meterId,
-                UpdateMeterRequestDto request);
+                UpdateMeterRequestDto request, int userId);
 
         Task<MeterResponseDto>
-            DeactivateMeterAsync(int meterId);
+            DeactivateMeterAsync(int meterId, int userId);
 
-        Task<List<MeterResponseDto>> GetMetersByHouseAsync(int houseId);
+        Task<List<MeterResponseDto>> GetMetersByHouseAsync(int houseId, int userId);
 
-        Task<List<MeterOverviewResponseDto>> GetMeterOverviewByHouseAsync(int houseId);
+        Task<List<MeterOverviewResponseDto>> GetMeterOverviewByHouseAsync(int houseId, int userId);
     }
 }

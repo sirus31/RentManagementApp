@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 
@@ -6,6 +8,7 @@ using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MeterAssignmentController
@@ -23,6 +26,11 @@ namespace RentManagementApp.Controllers
                 meterAssignmentService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
+
         [HttpPost("assign")]
         public async Task<IActionResult> AssignMeter(AssignMeterRequestDto request)
         {
@@ -30,7 +38,7 @@ namespace RentManagementApp.Controllers
             {
                 var response =
                     await _meterAssignmentService
-                    .AssignMeterAsync(request);
+                    .AssignMeterAsync(request, GetUserId());
 
 
                 return Ok(response);
@@ -50,7 +58,7 @@ namespace RentManagementApp.Controllers
         {
             await _meterAssignmentService
                 .RemoveMeterAssignmentAsync(
-                    request);
+                    request, GetUserId());
 
             return Ok(
                 "Assignment removed successfully");
@@ -62,7 +70,7 @@ namespace RentManagementApp.Controllers
         {
             var assignments =
                 await _meterAssignmentService
-                    .GetActiveAssignmentsAsync();
+                    .GetActiveAssignmentsAsync(GetUserId());
 
             return Ok(assignments);
         }

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 
@@ -6,6 +8,7 @@ using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MeterReadingController
@@ -23,6 +26,11 @@ namespace RentManagementApp.Controllers
                 meterReadingService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
+
         [HttpPost]
         public async Task<IActionResult>
             AddReading(
@@ -30,7 +38,7 @@ namespace RentManagementApp.Controllers
         {
             var response =
                 await _meterReadingService
-                    .AddReadingAsync(request);
+                    .AddReadingAsync(request, GetUserId());
 
             return Ok(response);
         }
@@ -43,7 +51,7 @@ namespace RentManagementApp.Controllers
             var readings =
                 await _meterReadingService
                     .GetMeterReadingsAsync(
-                        meterId);
+                        meterId, GetUserId());
 
             return Ok(readings);
         }
@@ -56,7 +64,7 @@ namespace RentManagementApp.Controllers
             var reading =
                 await _meterReadingService
                     .GetLatestReadingAsync(
-                        meterId);
+                        meterId, GetUserId());
 
             if (reading == null)
             {

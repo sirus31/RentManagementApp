@@ -7,21 +7,21 @@ namespace RentManagementApp.Services.Interfaces
     {
         Task<RoomResponseDto>
             CreateRoomAsync(
-                CreateRoomRequestDto request);
+                CreateRoomRequestDto request, int userId);
 
         Task<List<RoomResponseDto>>
-            GetAllRoomsAsync();
+            GetAllRoomsAsync(int userId);
 
         Task<List<RoomResponseDto>>
             GetRoomsByFloorAsync(
-                int floorId);
+                int floorId, int userId);
 
         Task<List<RoomResponseDto>>
             GetAvailableRoomsByHouseAsync(
-                int houseId);
+                int houseId, int userId);
 
         Task<List<RoomOverviewByFloorResponseDto>>
             GetRoomOverviewByHouseAsync(
-                int houseId);
+                int houseId, int userId);
     }
 }

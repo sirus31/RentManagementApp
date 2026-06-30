@@ -7,12 +7,12 @@ namespace RentManagementApp.Services.Interfaces
     {
         Task<MeterAssignmentResponseDto>
             AssignMeterAsync(
-                AssignMeterRequestDto request);
+                AssignMeterRequestDto request, int userId);
 
         Task RemoveMeterAssignmentAsync(
-            RemoveMeterAssignmentRequestDto request);
+            RemoveMeterAssignmentRequestDto request, int userId);
 
         Task<List<MeterAssignmentResponseDto>>
-            GetActiveAssignmentsAsync();
+            GetActiveAssignmentsAsync(int userId);
     }
 }

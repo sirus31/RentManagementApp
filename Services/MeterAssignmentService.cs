@@ -25,7 +25,7 @@ namespace RentManagementApp.Services
 
         public async Task<MeterAssignmentResponseDto>
             AssignMeterAsync(
-                AssignMeterRequestDto request)
+                AssignMeterRequestDto request, int userId)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t =>
@@ -38,10 +38,11 @@ namespace RentManagementApp.Services
             }
 
             var meter = await _context.Meters
+                .Include(m => m.House)
                 .FirstOrDefaultAsync(m =>
                     m.Id == request.MeterId);
 
-            if (meter == null)
+            if (meter == null || meter.House.UserId != userId)
             {
                 throw new Exception(
                     "Meter not found");
@@ -59,7 +60,9 @@ namespace RentManagementApp.Services
                         tr.TenantId ==
                             request.TenantId
                         &&
-                        tr.EndDate == null);
+                        tr.EndDate == null
+                        &&
+                        tr.Room.Floor.House.UserId == userId);
 
             if (!tenantHasActiveRoom)
             {
@@ -152,15 +155,17 @@ namespace RentManagementApp.Services
 
         public async Task
             RemoveMeterAssignmentAsync(
-                RemoveMeterAssignmentRequestDto request)
+                RemoveMeterAssignmentRequestDto request, int userId)
         {
             var tenantMeter =
                 await _context.TenantMeters
+                    .Include(tm => tm.Meter)
+                        .ThenInclude(m => m.House)
                     .FirstOrDefaultAsync(tm =>
                         tm.Id ==
                             request.TenantMeterId);
 
-            if (tenantMeter == null)
+            if (tenantMeter == null || tenantMeter.Meter.House.UserId != userId)
             {
                 throw new Exception(
                     "Assignment not found");
@@ -182,14 +187,15 @@ namespace RentManagementApp.Services
 
         public async Task<
             List<MeterAssignmentResponseDto>>
-            GetActiveAssignmentsAsync()
+            GetActiveAssignmentsAsync(int userId)
         {
             return await _context.TenantMeters
                 .Include(tm => tm.Tenant)
                 .Include(tm => tm.Meter)
 
                 .Where(tm =>
-                    tm.EndDate == null)
+                    tm.EndDate == null
+                    && tm.Meter.House.UserId == userId)
 
                 .Select(tm =>
                     new MeterAssignmentResponseDto

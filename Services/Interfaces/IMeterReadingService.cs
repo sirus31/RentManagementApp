@@ -7,14 +7,14 @@ namespace RentManagementApp.Services.Interfaces
     {
         Task<MeterReadingResponseDto>
             AddReadingAsync(
-                CreateMeterReadingRequestDto request);
+                CreateMeterReadingRequestDto request, int userId);
 
         Task<List<MeterReadingResponseDto>>
             GetMeterReadingsAsync(
-                int meterId);
+                int meterId, int userId);
 
         Task<MeterReadingResponseDto?>
             GetLatestReadingAsync(
-                int meterId);
+                int meterId, int userId);
     }
 }

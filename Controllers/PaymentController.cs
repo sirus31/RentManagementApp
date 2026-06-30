@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 
@@ -7,6 +9,7 @@ using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
 
     [Route("api/[controller]")]
@@ -23,6 +26,10 @@ namespace RentManagementApp.Controllers
                 paymentService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
 
 
         [HttpPost]
@@ -33,7 +40,7 @@ namespace RentManagementApp.Controllers
             var payment =
                 await _paymentService
                     .CreatePaymentAsync(
-                        request);
+                        request, GetUserId());
 
 
             return Ok(payment);
@@ -49,7 +56,7 @@ namespace RentManagementApp.Controllers
             var payments =
                 await _paymentService
                     .GetBillPaymentsAsync(
-                        billId);
+                        billId, GetUserId());
 
 
             return Ok(payments);
@@ -63,7 +70,7 @@ namespace RentManagementApp.Controllers
         {
             var payments =
                 await _paymentService
-                    .GetAllPaymentsAsync();
+                    .GetAllPaymentsAsync(GetUserId());
 
 
             return Ok(payments);
@@ -82,6 +89,7 @@ namespace RentManagementApp.Controllers
             var dashboard =
                 await _paymentService
                     .GetPaymentDashboardAsync(
+                        GetUserId(),
                         houseId,
                         tenantId,
                         month,
@@ -100,7 +108,7 @@ namespace RentManagementApp.Controllers
 
             var filters =
                 await _paymentService
-                    .GetPaymentFiltersAsync();
+                    .GetPaymentFiltersAsync(GetUserId());
 
 
 

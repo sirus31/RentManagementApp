@@ -4,7 +4,6 @@ namespace RentManagementApp.DTOs.Requests
 {
     public class CreateHouseRequestDto
     {
-        [Required]
         public int UserId { get; set; }
 
         [Required]

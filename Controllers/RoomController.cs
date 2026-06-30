@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 
@@ -6,6 +8,7 @@ using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class RoomController : ControllerBase
@@ -18,6 +21,11 @@ namespace RentManagementApp.Controllers
             _roomService = roomService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
+
         [HttpPost]
         public async Task<IActionResult>
             CreateRoom(
@@ -25,7 +33,7 @@ namespace RentManagementApp.Controllers
         {
             var response =
                 await _roomService
-                    .CreateRoomAsync(request);
+                    .CreateRoomAsync(request, GetUserId());
 
             return Ok(response);
         }
@@ -36,7 +44,7 @@ namespace RentManagementApp.Controllers
         {
             var rooms =
                 await _roomService
-                    .GetAllRoomsAsync();
+                    .GetAllRoomsAsync(GetUserId());
 
             return Ok(rooms);
         }
@@ -49,7 +57,7 @@ namespace RentManagementApp.Controllers
             var rooms =
                 await _roomService
                     .GetRoomsByFloorAsync(
-                        floorId);
+                        floorId, GetUserId());
 
             return Ok(rooms);
         }
@@ -62,7 +70,7 @@ namespace RentManagementApp.Controllers
             var rooms =
                 await _roomService
                     .GetAvailableRoomsByHouseAsync(
-                        houseId);
+                        houseId, GetUserId());
 
             return Ok(rooms);
         }
@@ -77,7 +85,7 @@ namespace RentManagementApp.Controllers
                 var rooms =
                     await _roomService
                         .GetRoomOverviewByHouseAsync(
-                            houseId);
+                            houseId, GetUserId());
 
 
                 return Ok(

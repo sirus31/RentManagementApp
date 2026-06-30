@@ -23,7 +23,7 @@ namespace RentManagementApp.Services
 
         public async Task<OccupancyResponseDto>
             AssignRoomAsync(
-                AssignRoomRequestDto request)
+                AssignRoomRequestDto request, int userId)
         {
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t =>
@@ -36,10 +36,12 @@ namespace RentManagementApp.Services
             }
 
             var room = await _context.Rooms
+                .Include(r => r.Floor)
+                    .ThenInclude(f => f.House)
                 .FirstOrDefaultAsync(r =>
                     r.Id == request.RoomId);
 
-            if (room == null)
+            if (room == null || room.Floor.House.UserId != userId)
             {
                 throw new Exception(
                     "Room not found");
@@ -95,15 +97,18 @@ namespace RentManagementApp.Services
         }
 
         public async Task VacateRoomAsync(
-            VacateRoomRequestDto request)
+            VacateRoomRequestDto request, int userId)
         {
             var tenantRoom =
                 await _context.TenantRooms
                     .Include(tr => tr.Tenant)
+                    .Include(tr => tr.Room)
+                        .ThenInclude(r => r.Floor)
+                            .ThenInclude(f => f.House)
                     .FirstOrDefaultAsync(tr =>
                         tr.Id == request.TenantRoomId);
 
-            if (tenantRoom == null)
+            if (tenantRoom == null || tenantRoom.Room.Floor.House.UserId != userId)
             {
                 throw new Exception(
                     "Occupancy record not found");
@@ -138,13 +143,15 @@ namespace RentManagementApp.Services
         }
 
         public async Task<List<OccupancyResponseDto>>
-            GetActiveOccupanciesAsync()
+            GetActiveOccupanciesAsync(int userId)
         {
             return await _context.TenantRooms
                 .Include(tr => tr.Tenant)
                 .Include(tr => tr.Room)
+                    .ThenInclude(r => r.Floor)
 
-                .Where(tr => tr.EndDate == null)
+                .Where(tr => tr.EndDate == null
+                    && tr.Room.Floor.House.UserId == userId)
 
                 .Select(tr =>
                     new OccupancyResponseDto
@@ -173,7 +180,7 @@ namespace RentManagementApp.Services
 
         public async Task<OccupancyResponseDto>
     MoveInTenantAsync(
-        MoveInTenantRequestDto request)
+        MoveInTenantRequestDto request, int userId)
         {
             if (
                 request.RoomIds == null
@@ -227,11 +234,13 @@ namespace RentManagementApp.Services
                 {
                     var room =
                         await _context.Rooms
+                            .Include(r => r.Floor)
+                                .ThenInclude(f => f.House)
                             .FirstOrDefaultAsync(r =>
                                 r.Id == roomId);
 
 
-                    if (room == null)
+                    if (room == null || room.Floor.House.UserId != userId)
                     {
                         throw new Exception(
                             "Room not found");

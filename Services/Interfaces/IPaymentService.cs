@@ -7,25 +7,26 @@ namespace RentManagementApp.Services.Interfaces
     {
         Task<PaymentResponseDto>
             CreatePaymentAsync(
-                CreatePaymentRequestDto request);
+                CreatePaymentRequestDto request, int userId);
 
 
         Task<List<PaymentResponseDto>>
             GetBillPaymentsAsync(
-                int billId);
+                int billId, int userId);
 
 
         Task<List<PaymentResponseDto>>
-            GetAllPaymentsAsync();
+            GetAllPaymentsAsync(int userId);
 
         Task<PaymentDashboardResponseDto>
             GetPaymentDashboardAsync(
+                int userId,
                 int? houseId,
                 int? tenantId,
                 int? month,
                 int? year
             );
 
-        Task<PaymentFilterResponseDto> GetPaymentFiltersAsync();
+        Task<PaymentFilterResponseDto> GetPaymentFiltersAsync(int userId);
     }
 }

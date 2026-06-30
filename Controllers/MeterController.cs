@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 
@@ -6,6 +8,7 @@ using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MeterController
@@ -20,6 +23,11 @@ namespace RentManagementApp.Controllers
             _meterService = meterService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
+
         [HttpPost]
         public async Task<IActionResult>
             CreateMeter(
@@ -27,7 +35,7 @@ namespace RentManagementApp.Controllers
         {
             var response =
                 await _meterService
-                    .CreateMeterAsync(request);
+                    .CreateMeterAsync(request, GetUserId());
 
             return Ok(response);
         }
@@ -38,7 +46,7 @@ namespace RentManagementApp.Controllers
         {
             var response =
                 await _meterService
-                    .GetAllMetersAsync();
+                    .GetAllMetersAsync(GetUserId());
 
             return Ok(response);
         }
@@ -49,7 +57,7 @@ namespace RentManagementApp.Controllers
         {
             var response =
                 await _meterService
-                    .GetActiveMetersAsync();
+                    .GetActiveMetersAsync(GetUserId());
 
             return Ok(response);
         }
@@ -62,7 +70,7 @@ namespace RentManagementApp.Controllers
             var response =
                 await _meterService
                     .GetMeterByIdAsync(
-                        meterId);
+                        meterId, GetUserId());
 
             return Ok(response);
         }
@@ -77,7 +85,7 @@ namespace RentManagementApp.Controllers
                 await _meterService
                     .UpdateMeterAsync(
                         meterId,
-                        request);
+                        request, GetUserId());
 
             return Ok(response);
         }
@@ -90,7 +98,7 @@ namespace RentManagementApp.Controllers
             var response =
                 await _meterService
                     .DeactivateMeterAsync(
-                        meterId);
+                        meterId, GetUserId());
 
             return Ok(response);
         }
@@ -105,7 +113,7 @@ namespace RentManagementApp.Controllers
             var meters =
                 await _meterService
                 .GetMetersByHouseAsync(
-                    houseId
+                    houseId, GetUserId()
                 );
 
 
@@ -119,7 +127,7 @@ namespace RentManagementApp.Controllers
             var meters =
                 await _meterService
                     .GetMeterOverviewByHouseAsync(
-                        houseId
+                        houseId, GetUserId()
                     );
 
 

@@ -19,7 +19,7 @@ namespace RentManagementApp.Services
         }
 
         public async Task<TenantResponseDto> CreateTenantAsync(
-            CreateTenantRequestDto request)
+            CreateTenantRequestDto request, int userId)
         {
             var tenant = new Tenant
             {
@@ -47,9 +47,12 @@ namespace RentManagementApp.Services
         }
 
 
-        public async Task<List<TenantResponseDto>> GetAllTenantsAsync()
+        public async Task<List<TenantResponseDto>> GetAllTenantsAsync(int userId)
         {
             var tenants = await _context.Tenants
+                .Where(t =>
+                    t.TenantRooms.Any(tr =>
+                        tr.Room.Floor.House.UserId == userId))
                 .Select(t => new TenantResponseDto
                 {
                     Id = t.Id,
@@ -63,11 +66,16 @@ namespace RentManagementApp.Services
             return tenants;
         }
 
-        public async Task<List<TenantRoomSummaryResponseDto>> GetTenantsWithActiveRoomsAsync()
+        public async Task<List<TenantRoomSummaryResponseDto>> GetTenantsWithActiveRoomsAsync(int userId)
         {
             var tenants = await _context.Tenants
                 .Include(t => t.TenantRooms)
                     .ThenInclude(tr => tr.Room)
+                        .ThenInclude(r => r.Floor)
+                .Where(t =>
+                    t.TenantRooms.Any(tr =>
+                        tr.EndDate == null
+                        && tr.Room.Floor.House.UserId == userId))
 
                 .Select(t => new TenantRoomSummaryResponseDto
                 {
@@ -77,7 +85,8 @@ namespace RentManagementApp.Services
 
                     RoomNumbers = t.TenantRooms
 
-                        .Where(tr => tr.EndDate == null)
+                        .Where(tr => tr.EndDate == null
+                            && tr.Room.Floor.House.UserId == userId)
 
                         .Select(tr => tr.Room.RoomNumber)
 
@@ -88,11 +97,15 @@ namespace RentManagementApp.Services
             return tenants;
         }
 
-        public async Task<List<TenantRoomSummaryResponseDto>> GetTenantOccupancyHistoryAsync()
+        public async Task<List<TenantRoomSummaryResponseDto>> GetTenantOccupancyHistoryAsync(int userId)
         {
             var tenants = await _context.Tenants
                 .Include(t => t.TenantRooms)
                     .ThenInclude(tr => tr.Room)
+                        .ThenInclude(r => r.Floor)
+                .Where(t =>
+                    t.TenantRooms.Any(tr =>
+                        tr.Room.Floor.House.UserId == userId))
 
                 .Select(t => new TenantRoomSummaryResponseDto
                 {
@@ -102,6 +115,8 @@ namespace RentManagementApp.Services
 
                     RoomNumbers = t.TenantRooms
 
+                        .Where(tr => tr.Room.Floor.House.UserId == userId)
+
                         .Select(tr => tr.Room.RoomNumber)
 
                         .ToList()
@@ -110,7 +125,7 @@ namespace RentManagementApp.Services
 
             return tenants;
         }
-        public async Task AssignRoomAsync(AssignRoomRequestDto request)
+        public async Task AssignRoomAsync(AssignRoomRequestDto request, int userId)
         {
             var tenantExists = await _context.Tenants
                 .AnyAsync(t => t.Id == request.TenantId);
@@ -120,10 +135,10 @@ namespace RentManagementApp.Services
                 throw new Exception("Tenant not found");
             }
 
-            var roomExists = await _context.Rooms
-                .AnyAsync(r => r.Id == request.RoomId);
+            var room = await _context.Rooms
+                .FirstOrDefaultAsync(r => r.Id == request.RoomId);
 
-            if (!roomExists)
+            if (room == null || room.Floor.House.UserId != userId)
             {
                 throw new Exception("Room not found");
             }
@@ -141,14 +156,18 @@ namespace RentManagementApp.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<VacateTenantResponseDto> VacateTenantAsync(int tenantId)
+        public async Task<VacateTenantResponseDto> VacateTenantAsync(int tenantId, int userId)
         {
             var tenant =
                 await _context.Tenants
 
                     .Include(t => t.TenantRooms)
+                        .ThenInclude(tr => tr.Room)
+                            .ThenInclude(r => r.Floor)
+                                .ThenInclude(f => f.House)
 
                     .Include(t => t.TenantMeters)
+                        .ThenInclude(tm => tm.Meter)
 
                     .Include(t => t.Bills)
 
@@ -157,6 +176,13 @@ namespace RentManagementApp.Services
 
 
             if (tenant == null)
+            {
+                throw new Exception(
+                    "Tenant not found");
+            }
+
+            if (!tenant.TenantRooms.Any(tr =>
+                tr.Room.Floor.House.UserId == userId))
             {
                 throw new Exception(
                     "Tenant not found");
@@ -235,15 +261,23 @@ namespace RentManagementApp.Services
             };
         }
 
-        public async Task<TenantResponseDto?> GetTenantByIdAsync(int id)
+        public async Task<TenantResponseDto?> GetTenantByIdAsync(int id, int userId)
         {
             var tenant = await _context.Tenants
-
+                .Include(t => t.TenantRooms)
+                    .ThenInclude(tr => tr.Room)
+                        .ThenInclude(r => r.Floor)
+                            .ThenInclude(f => f.House)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
-
-
             if (tenant == null)
+            {
+                return null;
+            }
+
+            if (tenant.TenantRooms.Any() &&
+                !tenant.TenantRooms.Any(tr =>
+                    tr.Room.Floor.House.UserId == userId))
             {
                 return null;
             }
@@ -264,24 +298,24 @@ namespace RentManagementApp.Services
 
         public async Task<List<TenantOverviewResponseDto>>
     GetTenantOverviewAsync(
-        int houseId
+        int houseId, int userId
     )
         {
             return await _context.Tenants
 
+                .Include(t => t.TenantRooms)
+                    .ThenInclude(tr => tr.Room)
+                        .ThenInclude(r => r.Floor)
+
+                .Include(t => t.TenantMeters)
+                    .ThenInclude(tm => tm.Meter)
 
                 .Where(t =>
                     t.TenantRooms.Any(tr =>
-
-                        tr.EndDate == null
-
-                        &&
-
                         tr.Room.Floor.HouseId == houseId
-
+                        && tr.Room.Floor.House.UserId == userId
                     )
                 )
-
 
                 .Select(t => new TenantOverviewResponseDto
                 {
@@ -308,6 +342,8 @@ namespace RentManagementApp.Services
                             tr.EndDate == null
                             &&
                             tr.Room.Floor.HouseId == houseId
+                            &&
+                            tr.Room.Floor.House.UserId == userId
                         )
 
                         .Select(tr =>
@@ -322,6 +358,8 @@ namespace RentManagementApp.Services
 
                         .Where(tm =>
                             tm.EndDate == null
+                            &&
+                            tm.Meter.House.UserId == userId
                         )
 
                         .Select(tm =>

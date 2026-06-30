@@ -23,14 +23,15 @@ namespace RentManagementApp.Services
 
         public async Task<RoomResponseDto>
             CreateRoomAsync(
-                CreateRoomRequestDto request)
+                CreateRoomRequestDto request, int userId)
         {
-            var floorExists =
+            var floor =
                 await _context.Floors
-                    .AnyAsync(f =>
+                    .Include(f => f.House)
+                    .FirstOrDefaultAsync(f =>
                         f.Id == request.FloorId);
 
-            if (!floorExists)
+            if (floor == null || floor.House.UserId != userId)
             {
                 throw new Exception(
                     "Floor not found");
@@ -61,9 +62,11 @@ namespace RentManagementApp.Services
         }
 
         public async Task<List<RoomResponseDto>>
-            GetAllRoomsAsync()
+            GetAllRoomsAsync(int userId)
         {
             return await _context.Rooms
+                .Where(r =>
+                    r.Floor.House.UserId == userId)
                 .Select(r => new RoomResponseDto
                 {
                     Id = r.Id,
@@ -78,11 +81,12 @@ namespace RentManagementApp.Services
 
         public async Task<List<RoomResponseDto>>
             GetRoomsByFloorAsync(
-                int floorId)
+                int floorId, int userId)
         {
             return await _context.Rooms
                 .Where(r =>
-                    r.FloorId == floorId)
+                    r.FloorId == floorId
+                    && r.Floor.House.UserId == userId)
 
                 .Select(r => new RoomResponseDto
                 {
@@ -98,7 +102,7 @@ namespace RentManagementApp.Services
 
         public async Task<List<RoomResponseDto>>
             GetAvailableRoomsByHouseAsync(
-                int houseId)
+                int houseId, int userId)
         {
             return await _context.Rooms
 
@@ -106,6 +110,8 @@ namespace RentManagementApp.Services
 
                 .Where(r =>
                     r.Floor.HouseId == houseId
+                    &&
+                    r.Floor.House.UserId == userId
                     &&
                     !_context.TenantRooms
                         .Any(tr =>
@@ -128,7 +134,7 @@ namespace RentManagementApp.Services
                 .ToListAsync();
         }
 
-        public async Task<List<RoomOverviewByFloorResponseDto>> GetRoomOverviewByHouseAsync(int houseId)
+        public async Task<List<RoomOverviewByFloorResponseDto>> GetRoomOverviewByHouseAsync(int houseId, int userId)
         {
             var floors =
                 await _context.Floors
@@ -143,7 +149,8 @@ namespace RentManagementApp.Services
                                 tr.Tenant)
 
                     .Where(f =>
-                        f.HouseId == houseId)
+                        f.HouseId == houseId
+                        && f.House.UserId == userId)
 
                     .Select(f =>
                         new RoomOverviewByFloorResponseDto

@@ -29,7 +29,7 @@ namespace RentManagementApp.Services
 
         public async Task<BillResponseDto>
             GenerateBillAsync(
-                GenerateBillRequestDto request)
+                GenerateBillRequestDto request, int userId)
         {
             var tenant = await _context.Tenants
 
@@ -46,6 +46,15 @@ namespace RentManagementApp.Services
 
 
             if (tenant == null)
+            {
+                throw new Exception(
+                    "Tenant not found");
+            }
+
+            var hasHouseAccess = tenant.TenantRooms.Any(tr =>
+                tr.Room.Floor.House.UserId == userId);
+
+            if (!hasHouseAccess)
             {
                 throw new Exception(
                     "Tenant not found");
@@ -332,12 +341,12 @@ namespace RentManagementApp.Services
 
 
             return await GetBillByIdAsync(
-                bill.Id);
+                bill.Id, userId);
         }
 
         public async Task<List<GenerateBillResultDto>>
             GenerateAllBillsAsync(
-                GenerateAllBillsRequestDto request)
+                GenerateAllBillsRequestDto request, int userId)
         {
             var results =
                 new List<GenerateBillResultDto>();
@@ -347,10 +356,13 @@ namespace RentManagementApp.Services
                 await _context.Tenants
 
                     .Include(t => t.TenantRooms)
+                        .ThenInclude(tr => tr.Room)
+                            .ThenInclude(r => r.Floor)
 
                     .Where(t =>
                         t.TenantRooms.Any(tr =>
-                            tr.EndDate == null))
+                            tr.EndDate == null
+                            && tr.Room.Floor.House.UserId == userId))
 
                     .ToListAsync();
 
@@ -408,7 +420,7 @@ namespace RentManagementApp.Services
 
                                 BillingMonth =
                                     request.BillingMonth
-                            });
+                            }, userId);
 
 
                     results.Add(
@@ -458,7 +470,7 @@ namespace RentManagementApp.Services
 
         public async Task<List<BillResponseDto>>
             GetTenantBillsAsync(
-                int tenantId)
+                int tenantId, int userId)
         {
             var bills =
                 await _context.Bills
@@ -470,7 +482,8 @@ namespace RentManagementApp.Services
                     .Include(b => b.BillDetails)
 
                     .Where(b =>
-                        b.TenantId == tenantId)
+                        b.TenantId == tenantId
+                        && b.BillCycle.House.UserId == userId)
 
                     .OrderByDescending(b =>
                         b.BillCycle.GeneratedDate)
@@ -553,7 +566,7 @@ namespace RentManagementApp.Services
         }
 
         public async Task<List<BillResponseDto>>
-            GetAllBillsAsync()
+            GetAllBillsAsync(int userId)
         {
             var bills =
                 await _context.Bills
@@ -563,6 +576,9 @@ namespace RentManagementApp.Services
                     .Include(b => b.BillCycle)
 
                     .Include(b => b.BillDetails)
+
+                    .Where(b =>
+                        b.BillCycle.House.UserId == userId)
 
                     .OrderByDescending(b =>
                         b.BillCycle.GeneratedDate)
@@ -646,7 +662,7 @@ namespace RentManagementApp.Services
 
         public async Task<BillResponseDto>
             GetBillByIdAsync(
-                int billId)
+                int billId, int userId)
         {
             var bill =
                 await _context.Bills
@@ -658,7 +674,8 @@ namespace RentManagementApp.Services
                     .Include(b => b.BillDetails)
 
                     .FirstOrDefaultAsync(b =>
-                        b.Id == billId);
+                        b.Id == billId
+                        && b.BillCycle.House.UserId == userId);
 
 
             if (bill == null)
@@ -741,13 +758,14 @@ namespace RentManagementApp.Services
 
         public async Task<BillResponseDto>
             FinalizeBillAsync(
-                int billId)
+                int billId, int userId)
         {
             var bill =
                 await _context.Bills
                     .Include(b => b.BillCycle)
                     .FirstOrDefaultAsync(b =>
-                        b.Id == billId);
+                        b.Id == billId
+                        && b.BillCycle.House.UserId == userId);
 
 
             if (bill == null)
@@ -785,18 +803,19 @@ namespace RentManagementApp.Services
 
 
             return await GetBillByIdAsync(
-                bill.Id);
+                bill.Id, userId);
         }
 
         public async Task<BillResponseDto>
             CancelBillAsync(
-                int billId)
+                int billId, int userId)
         {
             var bill =
                 await _context.Bills
                     .Include(b => b.BillCycle)
                     .FirstOrDefaultAsync(b =>
-                        b.Id == billId);
+                        b.Id == billId
+                        && b.BillCycle.House.UserId == userId);
 
 
             if (bill == null)
@@ -821,11 +840,21 @@ namespace RentManagementApp.Services
 
 
             return await GetBillByIdAsync(
-                bill.Id);
+                bill.Id, userId);
         }
 
-        public async Task<List<BillCycleOverviewResponseDto>> GetBillCyclesByHouseAsync(int houseId)
+        public async Task<List<BillCycleOverviewResponseDto>> GetBillCyclesByHouseAsync(int houseId, int userId)
         {
+            var houseExists = await _context.Houses
+                .AnyAsync(h =>
+                    h.Id == houseId
+                    && h.UserId == userId);
+
+            if (!houseExists)
+            {
+                throw new Exception("House not found");
+            }
+
             var cycles =
                 await _context.BillCycles
 
@@ -930,7 +959,6 @@ namespace RentManagementApp.Services
 
 
 
-
                             Bills =
                                 bc.Bills.Select(
                                     b =>
@@ -1006,8 +1034,7 @@ namespace RentManagementApp.Services
         }
 
         public async Task<BillFullDetailResponseDto?> GetBillDetailsAsync(
-    int billId
-)
+    int billId, int userId)
         {
             var bill = await _context.Bills
 
@@ -1021,9 +1048,12 @@ namespace RentManagementApp.Services
                         .ThenInclude(tenantRoom =>
                             tenantRoom.Room)
 
+                            .ThenInclude(room => room.Floor)
+
 
                 .Include(bill =>
                     bill.BillCycle)
+                        .ThenInclude(bc => bc.House)
 
 
                 .Include(bill =>
@@ -1036,6 +1066,7 @@ namespace RentManagementApp.Services
                 .FirstOrDefaultAsync(
                     bill =>
                         bill.Id == billId
+                        && bill.BillCycle.House.UserId == userId
                 );
 
 
@@ -1201,7 +1232,7 @@ namespace RentManagementApp.Services
             };
         }
 
-        public async Task<GenerateBillInfoResponseDto> GetGenerateBillInfoAsync(int houseId)
+        public async Task<GenerateBillInfoResponseDto> GetGenerateBillInfoAsync(int houseId, int userId)
         {
             var house =
                 await _context.Houses
@@ -1232,6 +1263,7 @@ namespace RentManagementApp.Services
                     .FirstOrDefaultAsync(
                         house =>
                             house.Id == houseId
+                            && house.UserId == userId
                     );
 
 
@@ -1444,10 +1476,20 @@ namespace RentManagementApp.Services
             };
         }
 
-        public async Task<List<GenerateBillResultDto>> GenerateMonthlyBillAsync(GenerateMonthlyBillRequestDto request)
+        public async Task<List<GenerateBillResultDto>> GenerateMonthlyBillAsync(GenerateMonthlyBillRequestDto request, int userId)
         {
             var results =
                 new List<GenerateBillResultDto>();
+
+            var houseExists = await _context.Houses
+                .AnyAsync(h =>
+                    h.Id == request.HouseId
+                    && h.UserId == userId);
+
+            if (!houseExists)
+            {
+                throw new Exception("House not found");
+            }
 
             var existingCycle =
                 await _context.BillCycles
@@ -1468,6 +1510,17 @@ namespace RentManagementApp.Services
 
             foreach (var reading in request.MeterReadings)
             {
+                var meter =
+                    await _context.Meters
+                        .FirstOrDefaultAsync(m =>
+                            m.Id == reading.MeterId);
+
+                if (meter == null || meter.House.UserId != userId)
+                {
+                    throw new Exception(
+                        $"Meter {reading.MeterId} not found");
+                }
+
                 var meterReading =
                     new MeterReading
                     {
@@ -1536,13 +1589,16 @@ namespace RentManagementApp.Services
                     .Include(t => t.TenantRooms)
 
                         .ThenInclude(tr => tr.Room)
+                            .ThenInclude(r => r.Floor)
 
                     .Where(t =>
                         t.TenantRooms.Any(tr =>
                             tr.EndDate == null
                             &&
                             tr.Room.Floor.HouseId
-                                == request.HouseId))
+                                == request.HouseId
+                            &&
+                            tr.Room.Floor.House.UserId == userId))
 
                     .ToListAsync();
 
@@ -1862,6 +1918,8 @@ namespace RentManagementApp.Services
                                 billDetails
                         };
 
+
+
                     await _context.Bills
                         .AddAsync(bill);
 
@@ -1918,7 +1976,8 @@ namespace RentManagementApp.Services
     ValidateBillCycleAsync(
         int houseId,
         int month,
-        int year)
+        int year,
+        int userId)
         {
             var existingCycle =
                 await _context.BillCycles
@@ -1948,6 +2007,7 @@ namespace RentManagementApp.Services
 
 
 
+
             var latestCycle =
                 await _context.BillCycles
 
@@ -1961,6 +2021,7 @@ namespace RentManagementApp.Services
                         bc.BillingMonth)
 
                     .FirstOrDefaultAsync();
+
 
 
 

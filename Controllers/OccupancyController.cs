@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 
@@ -6,6 +8,7 @@ using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class OccupancyController
@@ -21,6 +24,11 @@ namespace RentManagementApp.Controllers
                 occupancyService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
+
         [HttpPost("assign")]
         public async Task<IActionResult>
             AssignRoom(
@@ -28,7 +36,7 @@ namespace RentManagementApp.Controllers
         {
             var response =
                 await _occupancyService
-                    .AssignRoomAsync(request);
+                    .AssignRoomAsync(request, GetUserId());
 
             return Ok(response);
         }
@@ -39,7 +47,7 @@ namespace RentManagementApp.Controllers
                 VacateRoomRequestDto request)
         {
             await _occupancyService
-                .VacateRoomAsync(request);
+                .VacateRoomAsync(request, GetUserId());
 
             return Ok(
                 "Room vacated successfully");
@@ -51,7 +59,7 @@ namespace RentManagementApp.Controllers
         {
             var occupancies =
                 await _occupancyService
-                    .GetActiveOccupanciesAsync();
+                    .GetActiveOccupanciesAsync(GetUserId());
 
             return Ok(occupancies);
         }
@@ -65,7 +73,7 @@ namespace RentManagementApp.Controllers
             {
                 var result =
                     await _occupancyService
-                        .MoveInTenantAsync(request);
+                        .MoveInTenantAsync(request, GetUserId());
 
 
                 return Ok(result);
@@ -78,26 +86,5 @@ namespace RentManagementApp.Controllers
                 );
             }
         }
-
-        // [HttpPost("move-in")]
-        // public async Task<IActionResult> MoveInTenant(MoveInTenantRequestDto request)
-        // {
-        //     try
-        //     {
-        //         await _occupancyService
-        //             .MoveInTenantAsync(
-        //                 request);
-
-
-        //         return Ok(
-        //             "Tenant moved in successfully");
-        //     }
-
-        //     catch (Exception ex)
-        //     {
-        //         return BadRequest(
-        //             ex.Message);
-        //     }
-        // }
     }
 }

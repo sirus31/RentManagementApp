@@ -26,13 +26,13 @@ namespace RentManagementApp.Services
         public async Task<
             MeterReadingResponseDto>
             AddReadingAsync(
-                CreateMeterReadingRequestDto request)
+                CreateMeterReadingRequestDto request, int userId)
         {
             var meter = await _context.Meters
                 .FirstOrDefaultAsync(m =>
                     m.Id == request.MeterId);
 
-            if (meter == null)
+            if (meter == null || meter.House.UserId != userId)
             {
                 throw new Exception(
                     "Meter not found");
@@ -146,8 +146,18 @@ namespace RentManagementApp.Services
         public async Task<
             List<MeterReadingResponseDto>>
             GetMeterReadingsAsync(
-                int meterId)
+                int meterId, int userId)
         {
+            var meterExists = await _context.Meters
+                .AnyAsync(m =>
+                    m.Id == meterId
+                    && m.House.UserId == userId);
+
+            if (!meterExists)
+            {
+                throw new Exception("Meter not found");
+            }
+
             return await _context.MeterReadings
 
                 .Include(r => r.Meter)
@@ -190,8 +200,18 @@ namespace RentManagementApp.Services
         public async Task<
             MeterReadingResponseDto?>
             GetLatestReadingAsync(
-                int meterId)
+                int meterId, int userId)
         {
+            var meterExists = await _context.Meters
+                .AnyAsync(m =>
+                    m.Id == meterId
+                    && m.House.UserId == userId);
+
+            if (!meterExists)
+            {
+                return null;
+            }
+
             var reading =
                 await _context.MeterReadings
 

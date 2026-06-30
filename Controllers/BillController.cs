@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 using RentManagementApp.DTOs.Responses;
@@ -7,6 +9,7 @@ using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BillController
@@ -22,6 +25,11 @@ namespace RentManagementApp.Controllers
             _billService = billService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
+
         [HttpPost("generate")]
         public async Task<IActionResult>
             GenerateBill(
@@ -29,7 +37,7 @@ namespace RentManagementApp.Controllers
         {
             var response =
                 await _billService
-                    .GenerateBillAsync(request);
+                    .GenerateBillAsync(request, GetUserId());
 
             return Ok(response);
         }
@@ -42,7 +50,7 @@ namespace RentManagementApp.Controllers
             var bills =
                 await _billService
                     .GetTenantBillsAsync(
-                        tenantId);
+                        tenantId, GetUserId());
 
             return Ok(bills);
         }
@@ -53,7 +61,7 @@ namespace RentManagementApp.Controllers
         {
             var bills =
                 await _billService
-                    .GetAllBillsAsync();
+                    .GetAllBillsAsync(GetUserId());
 
             return Ok(bills);
         }
@@ -66,7 +74,7 @@ namespace RentManagementApp.Controllers
             var bill =
                 await _billService
                     .GetBillByIdAsync(
-                        billId);
+                        billId, GetUserId());
 
             return Ok(bill);
         }
@@ -79,7 +87,7 @@ namespace RentManagementApp.Controllers
             var bill =
                 await _billService
                     .FinalizeBillAsync(
-                        billId);
+                        billId, GetUserId());
 
             return Ok(bill);
         }
@@ -92,7 +100,7 @@ namespace RentManagementApp.Controllers
             var bill =
                 await _billService
                     .CancelBillAsync(
-                        billId);
+                        billId, GetUserId());
 
             return Ok(bill);
         }
@@ -105,7 +113,7 @@ namespace RentManagementApp.Controllers
             var result =
                 await _billService
                     .GenerateAllBillsAsync(
-                        request);
+                        request, GetUserId());
 
 
             return Ok(result);
@@ -119,7 +127,7 @@ namespace RentManagementApp.Controllers
             var cycles =
                 await _billService
                     .GetBillCyclesByHouseAsync(
-                        houseId);
+                        houseId, GetUserId());
 
             return Ok(cycles);
         }
@@ -128,7 +136,7 @@ namespace RentManagementApp.Controllers
         public async Task<ActionResult<BillFullDetailResponseDto>> GetBillDetails(int billId)
         {
             var result =
-                await _billService.GetBillDetailsAsync(billId);
+                await _billService.GetBillDetailsAsync(billId, GetUserId());
 
 
             if (result == null)
@@ -150,7 +158,7 @@ namespace RentManagementApp.Controllers
         {
             var result =
                 await _billService.GetGenerateBillInfoAsync(
-                    houseId
+                    houseId, GetUserId()
                 );
 
 
@@ -167,7 +175,7 @@ namespace RentManagementApp.Controllers
                 var result =
                     await _billService
                         .GenerateMonthlyBillAsync(
-                            request
+                            request, GetUserId()
                         );
 
 
@@ -195,7 +203,7 @@ namespace RentManagementApp.Controllers
                     .ValidateBillCycleAsync(
                         houseId,
                         month,
-                        year);
+                        year, GetUserId());
 
 
             return Ok(result);

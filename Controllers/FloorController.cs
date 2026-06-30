@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 using RentManagementApp.DTOs.Requests;
 
@@ -6,6 +8,7 @@ using RentManagementApp.Services.Interfaces;
 
 namespace RentManagementApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class FloorController : ControllerBase
@@ -18,6 +21,11 @@ namespace RentManagementApp.Controllers
             _floorService = floorService;
         }
 
+        private int GetUserId()
+        {
+            return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("UserId")?.Value ?? "0");
+        }
+
         [HttpPost]
         public async Task<IActionResult>
             CreateFloor(
@@ -25,7 +33,7 @@ namespace RentManagementApp.Controllers
         {
             var response =
                 await _floorService
-                    .CreateFloorAsync(request);
+                    .CreateFloorAsync(request, GetUserId());
 
             return Ok(response);
         }
@@ -36,7 +44,7 @@ namespace RentManagementApp.Controllers
         {
             var floors =
                 await _floorService
-                    .GetAllFloorsAsync();
+                    .GetAllFloorsAsync(GetUserId());
 
             return Ok(floors);
         }
@@ -49,7 +57,7 @@ namespace RentManagementApp.Controllers
             var floors =
                 await _floorService
                     .GetFloorsByHouseAsync(
-                        houseId);
+                        houseId, GetUserId());
 
             return Ok(floors);
         }
