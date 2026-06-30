@@ -1512,6 +1512,7 @@ namespace RentManagementApp.Services
             {
                 var meter =
                     await _context.Meters
+                        .Include(m => m.House)
                         .FirstOrDefaultAsync(m =>
                             m.Id == reading.MeterId);
 

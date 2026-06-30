@@ -136,6 +136,7 @@ namespace RentManagementApp.Services
             }
 
             var room = await _context.Rooms
+                .Include(r => r.Floor).ThenInclude(f => f.House)
                 .FirstOrDefaultAsync(r => r.Id == request.RoomId);
 
             if (room == null || room.Floor.House.UserId != userId)

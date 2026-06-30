@@ -35,7 +35,7 @@ namespace RentManagementApp.Services
             var bill = await _context.Bills
 
                 .Include(b =>
-                    b.BillCycle)
+                    b.BillCycle).ThenInclude(bc => bc.House)
 
                 .FirstOrDefaultAsync(b =>
                     b.Id == request.BillId);

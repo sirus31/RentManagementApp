@@ -29,6 +29,7 @@ namespace RentManagementApp.Services
                 CreateMeterReadingRequestDto request, int userId)
         {
             var meter = await _context.Meters
+                .Include(m => m.House)
                 .FirstOrDefaultAsync(m =>
                     m.Id == request.MeterId);
 
